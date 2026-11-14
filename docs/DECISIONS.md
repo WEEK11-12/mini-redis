@@ -121,4 +121,4 @@ JSON 본문에 키를 담으면 빈 키·슬래시·줄바꿈을 경로로 표�
 - [Redis 만료](https://redis.io/docs/latest/commands/expire/) · [RESP](https://redis.io/docs/latest/develop/reference/protocol-spec/)
 - [Redis 영속성](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/)
 
-[문서 안내](README.md) · [내부 구조](DESIGN.md) · [학습 중 정리한 선택 목록](https://github.com/jye-1123/mini-redis/blob/study-jye/study/07-project-decisions.md)
+[문서 안내](README.md) · [내부 구조](DESIGN.md) · [학습 중 정리한 선택 목록](../study/07-project-decisions.md)

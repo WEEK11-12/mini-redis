@@ -1,6 +1,6 @@
 # Mini Redis 내부 설계
 
-Python + Flask + Waitress로 문자열 키·값을 제공하는 단일 프로세스 메모리 서버다. 규칙은 [REQUIREMENTS](REQUIREMENTS.md), HTTP 계약은 [API](API.md), 이유와 대안은 [DECISIONS](DECISIONS.md)를 따른다. 현재 구현은 없다.
+Python + Flask + Waitress로 문자열 키·값을 제공하는 단일 프로세스 메모리 서버다. 규칙은 [REQUIREMENTS](REQUIREMENTS.md), HTTP 계약은 [API](API.md), 이유와 대안은 [DECISIONS](DECISIONS.md)를 따른다. 현재 U1의 저장·조회·삭제·체이닝과 락은 구현했고, 나머지는 설계 상태다. 실제 결과는 [U1 검증 기록](verification/U1-storage.md)을 따른다.
 
 ## 처리 흐름
 
@@ -30,7 +30,7 @@ flowchart TD
 | 실행 진입점 | 저장소·청소·Waitress의 시작과 정리 | import만으로 실행되지 않음 |
 | 캐시 데모 | 원본 API 조회와 캐시 사용 판단 | 저장 서버 안에서 원본 API를 호출하지 않음 |
 
-위 표는 책임 경계다. 아직 없는 소스 파일의 이름·클래스 구성까지 확정한 것은 아니다. 첫 구현 시 최소 파일로 배치한다.
+위 표는 책임 경계다. 현재 U1은 mini_redis/store.py에 해시·노드·저장소를 함께 배치하고 tests/test_store.py에서 검증한다. 이후 모듈 분리는 해당 역할의 코드가 생길 때 검토한다.
 
 ## 저장소와 입력
 
@@ -39,7 +39,7 @@ flowchart TD
 - FNV-1a 64비트를 UTF-8 키 바이트에 적용한다. Python 정수는 자동으로 64비트에서 넘치지 않으므로 각 곱셈 결과를 64비트 범위로 제한한다.
 - 버킷 위치는 해시값 % 버킷 수. 같은 버킷에서는 실제 키를 비교한다.
 - 초기 16버킷, 신규 키로 적재율 0.75 초과 시 2배. 전체 리해싱. 덮어쓰기는 키 수를 늘리지 않는다.
-- get은 문자열 또는 None, delete는 삭제 여부 bool. 첫 단위 set의 내부 반환 형식은 HTTP 응답과 구분하며 테스트 전에 명시한다.
+- get은 문자열 또는 None, delete는 삭제 여부 bool. set은 별도 결과 없이 None을 반환한다. HTTP의 ok 응답과 내부 호출 결과를 구분한다.
 - 검증 오류는 변경 전에 거부한다. 문자열은 불변 객체이므로 C의 빌린 포인터·수동 free 규칙을 옮기지 않는다.
 
 ## 락의 범위

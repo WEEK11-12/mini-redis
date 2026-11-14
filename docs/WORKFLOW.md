@@ -33,9 +33,9 @@
 
 ## 개인 포크와 팀 저장소
 
-개인 포크 origin은 jye-1123/mini-redis, 팀 upstream은 WEEK11-12/mini-redis다. main에는 실제 프로젝트의 요구사항·설계·API·테스트·코드를 관리한다. study-jye에는 공부한 개념과 예시만 보관한다. 학습 노트가 제품 계약을 대신하지 않는다.
+개인 포크 origin은 jye-1123/mini-redis, 팀 upstream은 WEEK11-12/mini-redis다. 개인 main에서 코드·설계·API·테스트와 study/ 학습 노트를 함께 관리한다. 로컬 작업 폴더는 main-redis 하나다. docs/는 제품 계약, study/는 개념과 예시이며 학습 노트가 제품 계약을 대신하지 않는다. 기존 study-jye 브랜치는 삭제하지 않고 과거 이력으로 보존한다.
 
-개인 main이나 study-jye에 푸시해도 팀 저장소는 바뀌지 않는다. 팀 반영은 별도 요청과 대상 확인 후 진행한다. main과 학습 브랜치를 통째로 병합해서 학습 README나 필기를 실제 프로젝트에 섞지 않는다.
+개인 main에 푸시해도 팀 저장소는 바뀌지 않는다. 팀 yeongeun-main 반영은 별도 요청과 대상 확인 후 진행한다. 과거 학습 브랜치 전체를 병합하는 대신 필요한 노트를 study/로 가져왔다.
 
 ## 자료와 검증의 범위
 
@@ -45,4 +45,4 @@
 
 설계 이유는 [선택 기록](DECISIONS.md)에 대안과 함께 남깁니다. 초기 수치를 최적값으로 표현하거나 실행하지 않은 비교를 선택 근거로 만들지 않습니다.
 
-[학습 목차](https://github.com/jye-1123/mini-redis/blob/study-jye/study/00-overview.md) · [저장소 소개](../README.md)
+[학습 목차](../study/00-overview.md) · [저장소 소개](../README.md)

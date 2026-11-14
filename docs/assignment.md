@@ -28,6 +28,6 @@
 
 ## 과제 요구와 프로젝트 선택
 
-Python·Flask·Waitress, FNV-1a, 체이닝, 버킷 16개, 적재율 0.75, HTTP, 단일 프로세스·공용 락, 만료 검사 초기 수치는 과제에서 강제한 값이 아니라 우리가 선택한 설계입니다. 이유와 미결정 사항은 [설계 기록](https://github.com/jye-1123/mini-redis/blob/study-jye/study/07-project-decisions.md)에 따로 남깁니다.
+Python·Flask·Waitress, FNV-1a, 체이닝, 버킷 16개, 적재율 0.75, HTTP, 단일 프로세스·공용 락, 만료 검사 초기 수치는 과제에서 강제한 값이 아니라 우리가 선택한 설계입니다. 이유와 미결정 사항은 [설계 기록](DECISIONS.md)에 따로 남깁니다.
 
-[저장소 소개](../README.md) · [학습 목차](https://github.com/jye-1123/mini-redis/blob/study-jye/study/00-overview.md)
+[저장소 소개](../README.md) · [학습 목차](../study/00-overview.md)

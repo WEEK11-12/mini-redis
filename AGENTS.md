@@ -2,6 +2,8 @@
 
 이 문서는 이 저장소에서 작업하는 AI의 읽는 순서와 실행 경계를 정한다. 제품 동작은 요구사항과 설계 문서가 담당한다.
 
+로컬 작업 루트는 `C:\krafton_jungle\ai_week\main-redis` 하나이며, 개인 `jye-1123/mini-redis`의 main을 사용한다. 별도 Redis 작업 폴더를 다시 만들지 않는다.
+
 ## 작업 전에 읽을 순서
 
 1. [README](README.md): 목표와 현재 상태.
@@ -31,7 +33,7 @@
 
 ## 문서와 Git
 
-- 요구 동작은 REQUIREMENTS, 구조는 DESIGN, HTTP 계약은 API, 선택 이유는 DECISIONS, 테스트는 TESTING이 기준이다. 개념 학습 노트는 별도 study-jye 브랜치에 둔다. main에는 구현용 문서와 코드를 관리한다.
+- 요구 동작은 REQUIREMENTS, 구조는 DESIGN, HTTP 계약은 API, 선택 이유는 DECISIONS, 테스트는 TESTING이 기준이다. 코드·설계·테스트·study/ 학습 노트는 개인 main에서 함께 관리한다. docs/가 제품 계약이고 study/는 학습 설명이다.
 - 변경한 계약과 관련 요구·테스트 ID, 작업 인계를 함께 갱신한다. 긴 중단 전에도 WORKLOG에 실제 상태를 남긴다.
 - 최신 사용자 합의와 문서가 충돌하면 합의 내용을 확인하고 관련 문서를 고친다. 미정 정책을 AI가 확정하지 않는다.
 - 요청 없는 커밋·푸시·PR 생성, 팀 저장소 변경, 옵시디언 수정은 하지 않는다. 개인 origin과 팀 upstream을 구분한다.
