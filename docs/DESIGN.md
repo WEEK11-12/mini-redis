@@ -1,6 +1,6 @@
 # Mini Redis 내부 설계
 
-Python + Flask + Waitress로 문자열 키·값을 제공하는 단일 프로세스 메모리 서버다. 규칙은 [REQUIREMENTS](REQUIREMENTS.md), HTTP 계약은 [API](API.md), 이유와 대안은 [DECISIONS](DECISIONS.md)를 따른다. U1~U4의 저장소·입력 검사·확장·TTL·능동 청소와 작업자 시작/종료를 구현했다. U5의 합의한 필수 동시성 검증도 통과했으며 HTTP 연동은 설계 상태다. 단위별 실제 결과는 [history 목차](../history/README.md)를 따른다.
+Python + Flask + Waitress로 문자열 키·값을 제공하는 단일 프로세스 메모리 서버다. 규칙은 [REQUIREMENTS](REQUIREMENTS.md), HTTP 계약은 [API](API.md), 이유와 대안은 [DECISIONS](DECISIONS.md)를 따른다. U1~U4의 저장소·입력 검사·확장·TTL·능동 청소와 작업자 시작/종료를 구현했다. U5의 합의한 필수 동시성 검증도 통과했으며 U6 HTTP 연동과 U7 캐시 예제의 필수 검증도 완료했다. 단위별 실제 결과는 [history 목차](../history/README.md)를 따른다.
 
 ## 처리 흐름
 
@@ -69,16 +69,24 @@ TTL은 양의 정수 밀리초이며 bool은 정수로 취급하지 않는다. �
 
 진입점에서 저장소·락 생성 → 청소 스레드 하나 시작 → Waitress 실행. 종료 시 finally에서 Event로 종료 신호 → 청소 스레드 종료 확인. Event 대기로 대기 중에도 종료 신호에 반응하게 한다. join 중 저장소 락을 잡지 않는다.
 
-청소 스레드는 import·요청마다 시작하지 않는다. 강제 종료에서는 finally 실행을 보장하지 않는다. 초기 범위에 영속성이 없으므로 정상 종료라도 재시작하면 데이터가 없다. 요청 처리 중 종료·서버 자원 정리의 실제 동작은 서버 연동 시 검증한다.
+청소 스레드는 import·요청마다 시작하지 않는다. 강제 종료에서는 finally 실행을 보장하지 않는다. 초기 범위에 영속성이 없으므로 정상 종료라도 재시작하면 데이터가 없다. U6에서는 실제 Waitress 요청·테스트 서버 정리와 진입점의 인터럽트/오류 후 청소 종료를 검증했다. Windows 실제 Ctrl+C 키 입력·처리 중 강제 종료는 미검증이다.
 
 ## 초기 실행 설정
 
-단일 프로세스, 요청 워커 4개, 청소 1개, 127.0.0.1:8080, HTTP 본문 최대 8 MiB. Flask와 Waitress 모두 본문 제한을 적용한다. 서버에서 Flask 전에 거부한 오류가 같은 JSON 형식인지 서버 연동 테스트에서 따로 확인한다.
+단일 프로세스, 요청 워커 4개, 청소 1개, 127.0.0.1:8080, HTTP 본문 최대 8 MiB. Flask와 Waitress 모두 본문 제한을 적용한다. Waitress 3.0.2는 설정값 이상을 거부하므로 8 MiB + 1바이트, Flask는 8 MiB로 설정해 8 MiB까지 허용한다. 실제 Waitress 선행 거부는 413 text/plain으로 확인했다.
 
 여러 프로세스를 켜면 각각의 저장소가 나뉘므로 금지한다. 127.0.0.1은 같은 컴퓨터의 다른 프로그램에서 접근하는 기본값이다. 다른 컴퓨터에서 사용할 설정은 실제 노출 범위를 확인한 후 적용한다. 총 저장 용량이나 과부하 보호가 완성됐다는 뜻은 아니다.
+
+## 캐시 예제의 경계
+
+examples/cache_demo.py의 원본 API(8082)와 예제 서버(8081)는 Mini Redis(8080)와 별도 프로세스다. 브라우저 → 예제 서버 → Mini Redis 조회 → Miss면 원본 API 조회·Redis 저장 순서다. Mini Redis 자체에서 원본 API를 호출하지 않는다.
+
+원본 상품 하나의 JSON 응답을 문자열로 직렬화해 demo:product:1 키에 저장한다. 화면 TTL은 1초, 원본 대기는 50ms이며 상품 API 호출 횟수는 락으로 보호한다. 통계 조회는 상품 호출 횟수에 포함하지 않는다. 예제 응답은 no-store로 브라우저 캐시의 개입을 막는다.
+
+UI 시간은 예제 서버 처리 구간이며, 성능 스크립트는 클라이언트 HTTP 요청부터 JSON 응답 해석까지 측정한다. 의존 서버 오류는 예제에서 502로 보고하며 원본 우회·동시 Miss 합치기는 구현하지 않았다. 상세 조건과 한계는 [U7](../history/U7-cache.md)에 둔다.
 
 ## 구현 순서
 
 [TESTING](TESTING.md)의 U1 저장·조회·삭제 → U2 입력·해시·확장 → U3 TTL → U4 청소·생명주기 → U5 동시 접근 → U6 HTTP → U7 캐시 데모·성능 비교. 각 단위를 확인한 뒤 다음으로 이동한다.
 
-U4 실제 구현은 mini_redis/expiration.py의 ExpirationWorker와 store.cleanup이다. 작업자 인스턴스는 한 번의 시작/종료를 소유하며 반복 start는 추가 스레드를 만들지 않는다. 실제 서버 진입점과 finally 연결은 아직 없고 U6에서 구현한다. [U4 검증](../history/U4-cleanup.md)
+U4 실제 구현은 mini_redis/expiration.py의 ExpirationWorker와 store.cleanup이다. 작업자 인스턴스는 한 번의 시작/종료를 소유하며 반복 start는 추가 스레드를 만들지 않는다. 실제 서버 진입점과 finally 연결은 mini_redis/server.py에 구현했고 U6에서 검증했다. [U4 검증](../history/U4-cleanup.md)

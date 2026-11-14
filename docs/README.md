@@ -1,6 +1,6 @@
 # 프로젝트 문서 지도
 
-AI는 [AGENTS](../AGENTS.md) → [WORKLOG](../WORKLOG.md) → 관련 요구·설계·테스트 순서로 읽습니다. 개발자는 프로젝트 개요와 API부터 확인하면 됩니다. 현재 main에는 U1~U4 저장소·청소 코드와 U5 필수 동시성 테스트가 있으며 HTTP 서버는 아직 없습니다.
+AI는 [AGENTS](../AGENTS.md) → [WORKLOG](../WORKLOG.md) → 관련 요구·설계·테스트 순서로 읽습니다. 개발자는 프로젝트 개요와 API부터 확인하면 됩니다. 현재 main에는 U1~U7 저장소·청소·동시성·HTTP·캐시 예제와 필수 검증 기록이 있습니다.
 
 | 문서 | 담당하는 정보 | 중복을 피하는 기준 |
 | --- | --- | --- |
@@ -23,18 +23,19 @@ main-redis/
 ├─ AGENTS.md              AI 작업 규칙
 ├─ README.md              개발자를 위한 입구
 ├─ WORKLOG.md             상태와 인계
-├─ mini_redis/           store.py·expiration.py 구현
-├─ tests/                저장소·TTL·청소 자동 검사
+├─ mini_redis/            저장 엔진·청소·HTTP API·서버
+├─ tests/                 저장소·동시성·HTTP·캐시 자동 검사
+├─ examples/              상품 캐시 예제 서버·원본 API·HTML
 ├─ docs/                  요구·설계·API·테스트 계획
 ├─ history/               실행 증거·원인·수정 기록
 └─ study/                 개념 학습 필기
 ```
 
-현재 mini_redis/에 저장소를, tests/에 unittest를 두고 있습니다. U1~U5의 실제 과정은 [history 목차](../history/README.md), 자동 테스트별 파일·명령은 [tests 안내](../tests/README.md)에 둡니다. 존재하지 않는 경로를 현재 구현처럼 안내하지 않습니다. 설계·규격·코드·테스트는 개인 포크 main이 기준입니다. 현재 학습 필기는 같은 main의 study/에서 관리하며 기존 study-jye는 과거 기록입니다.
+현재 mini_redis/에 저장소를, tests/에 unittest를 두고 있습니다. U1~U7의 실제 과정은 [history 목차](../history/README.md), 자동 테스트별 파일·명령은 [tests 안내](../tests/README.md)에 둡니다. 존재하지 않는 경로를 현재 구현처럼 안내하지 않습니다. 설계·규격·코드·테스트는 개인 포크 main이 기준입니다. 현재 학습 필기는 같은 main의 study/에서 관리하며 기존 study-jye는 과거 기록입니다.
 
 ## 파일을 추가하는 기준
 
-- 구현 코드는 mini_redis/에, 자동 테스트 코드는 tests/에 둡니다. 테스트는 구현을 import하고 구현이 테스트를 import하지 않습니다.
+- Mini Redis 구현 코드는 mini_redis/에, 이를 사용하는 예제는 examples/에, 자동 테스트 코드는 tests/에 둡니다. 테스트는 구현을 import하고 구현이 테스트를 import하지 않습니다.
 - 검증 결과는 루트 history/에 남깁니다. 계획 문서 TESTING과 실제 실행 기록을 구분합니다.
 - U1·U2 같은 진행 단위와 파일을 무조건 일대일로 만들지 않습니다. 같은 저장소 기능은 기존 store.py와 test_store.py에서 이어서 검증할 수 있습니다.
 - 상세 설계가 실제로 길어져 읽는 목적이 나뉠 때 하위 문서로 분리합니다. 아직 없는 기능의 빈 디렉터리·추상 계층을 미리 만들지 않습니다.
