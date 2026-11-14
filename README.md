@@ -1,32 +1,43 @@
 # Mini Redis
 
-직접 만든 해시 테이블에 문자열 키·값을 보관하고, HTTP API로 저장·조회·삭제·TTL을 제공하는 작은 메모리 서버입니다.
+문자열 키·값을 메모리에 보관하고 HTTP API로 저장·조회·삭제하는 작은 서버입니다. Python으로 해시 테이블을 직접 구현했으며, TTL(보관 기간)이 지난 값은 조회 결과에서 제외하고 청소 작업으로 제거합니다.
 
-**현재 상태:** U1~U7 필수 구현·검증 완료. 자동 테스트 57개 통과, 캐시 사용 방식별 실제 HTTP 왕복 각 20회 측정. [단위별 과정과 결과](history/README.md)
+반복해서 가져오는 API 응답을 잠시 저장해 재사용하려는 개발자가 로컬에서 실행해 볼 수 있습니다. 상품 캐시 예제를 통해 원본 API를 매번 호출하는 경우와 저장된 응답을 사용하는 경우를 비교할 수 있습니다. 실제 Redis와 호환되는 제품은 아니며, 저장소와 캐시의 동작을 구현·검증하는 프로젝트입니다.
 
-**바로 찾기:** [빠른 시작](#빠른-시작) · [HTTP API](#http-api) · [상품 캐시 예제](#상품-캐시-예제) · [테스트 실행](#테스트-실행) · [설계 문서](#프로젝트-문서) · [제한 사항](#제한-사항)
-
-## 주요 기능
-
-- 문자열 키·값 **저장·조회·삭제**, 빈 문자열과 한글·공백·줄바꿈 보존
-- 양의 정수 밀리초 **TTL**, 조회 시 만료 확인과 주기적 청소
-- 단일 저장소와 공용 락을 사용한 **여러 HTTP 요청 처리**
-- 직접 만든 해시 테이블의 **충돌 처리·확장**
-- 다른 프로그램이 API 응답을 저장·재사용하는 **상품 캐시 예제**
-
-**Python + Flask + Waitress / Windows**를 사용합니다. C의 수동 메모리 관리보다 저장소 동작과 검증에 집중하기 위한 선택이며, 구현 시간 단축이나 성능 우위를 측정한 결과는 아닙니다. 실제 Redis 전체 기능과 RESP 클라이언트 호환은 목표가 아닙니다.
+[빠른 시작](#빠른-시작) · [주요 기능](#주요-기능) · [설정과 주의사항](#설정과-주의사항) · [HTTP API](#http-api) · [상품 캐시 예제](#상품-캐시-예제) · [테스트 실행](#테스트-실행) · [문서 안내](#문서-안내)
 
 ## 빠른 시작
 
-Python 3.13을 준비하고 프로젝트 루트에서 PowerShell로 실행합니다. 아래 명령은 Windows 기준이며, Python 3.13.14·Flask 3.1.3·Waitress 3.0.2에서 검증했습니다. 설치 대상은 프로젝트 안의 `.venv`입니다.
+Git과 Python 3.13을 준비하세요. 아래는 **Windows PowerShell 기준**입니다. 기존 검증 환경은 Python 3.13.14, Flask 3.1.3, Waitress 3.0.2이며, 다른 운영체제에서의 실행은 검증하지 않았습니다.
+
+### 1. 프로젝트 받기
 
 ```powershell
+git clone https://github.com/jye-1123/mini-redis.git main-redis
+cd main-redis
+```
+
+이미 프로젝트가 있다면 해당 폴더로 이동하세요. 이후 명령은 모두 `requirements.txt`가 있는 프로젝트 루트에서 실행합니다.
+
+### 2. 의존성 설치
+
+```powershell
+python --version
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+`python --version`으로 3.13인지 확인하세요. 가상환경을 활성화할 필요 없이 `.venv`의 Python을 직접 사용합니다. 별도의 Redis 설치, 환경 변수, API 키는 필요하지 않습니다.
+
+### 3. 서버 실행
+
+```powershell
 .\.venv\Scripts\python.exe -m mini_redis.server
 ```
 
-실행하면 127.0.0.1:8080에서 요청을 기다립니다. 종료는 Ctrl+C입니다. **두 번째 PowerShell 창**에서 다음 순서로 호출합니다.
+기본 주소는 `http://127.0.0.1:8080`입니다. 실행한 창을 열어 둔 채 **두 번째 PowerShell 창**에서 아래 요청을 보냅니다.
+
+### 4. 저장·조회·삭제 확인
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8080/set -Method Post -ContentType 'application/json' -Body '{"key":"name","value":"JYE"}'
@@ -34,9 +45,46 @@ Invoke-RestMethod http://127.0.0.1:8080/get -Method Post -ContentType 'applicati
 Invoke-RestMethod http://127.0.0.1:8080/delete -Method Post -ContentType 'application/json' -Body '{"key":"name"}'
 ```
 
-순서대로 `{"ok":true}` → `{"found":true,"value":"JYE"}` → `{"deleted":true}`에 해당하는 응답을 받습니다. PowerShell은 JSON을 객체로 표시합니다. TTL을 사용하려면 `/set` 본문에 `"ttl_ms":1500`을 추가하세요. 1.5초 뒤 조회하면 `{"found":false,"value":null}`입니다. [정확한 입력·오류 규칙](docs/API.md)
+순서대로 `{"ok":true}` → `{"found":true,"value":"JYE"}` → `{"deleted":true}`에 해당하는 결과가 나옵니다. PowerShell은 JSON을 객체로 표시합니다. 삭제 후 다시 조회하면 `{"found":false,"value":null}`입니다.
 
-기본 주소는 같은 컴퓨터에서만 접근합니다. 서버 창에서 `Ctrl+C`로 종료할 수 있습니다. 종료하면 메모리에 저장된 데이터가 사라집니다.
+서버 창에서 `Ctrl+C`로 종료합니다. **종료하면 저장된 데이터도 사라집니다.**
+
+## 주요 기능
+
+- **키로 데이터 저장·조회·삭제:** 문자열을 저장하며, 빈 문자열·한글·공백·줄바꿈을 보존합니다.
+- **보관 기간 지정:** `/set`에 `ttl_ms`를 넣으면 해당 기간이 지난 값은 조회되지 않습니다. 생략하면 만료되지 않습니다.
+- **여러 요청의 저장소 공유:** 한 프로세스의 요청 스레드와 청소 스레드가 같은 저장소를 사용하고, 공용 락으로 저장소 작업을 보호합니다.
+- **해시 충돌 처리와 확장:** 버킷 배열과 연결 리스트 체이닝으로 키를 찾고, 키가 늘면 버킷을 확장합니다.
+- **캐시 사용 흐름 확인:** 예제 화면에서 캐시 미사용·MISS·HIT·만료·삭제에 따른 원본 API 호출을 관찰합니다.
+
+## 설정과 주의사항
+
+현재 실행 명령에는 주소·포트를 바꾸는 옵션이나 환경 변수 설정이 없습니다. 아래 값은 실행 코드의 기본값입니다.
+
+| 항목 | 현재 설정 | 확인할 코드 |
+| --- | --- | --- |
+| Mini Redis | `127.0.0.1:8080`, 요청 스레드 4개 | [server.py](mini_redis/server.py) |
+| 원본 상품 API / 예제 웹 서버 | `127.0.0.1:8082` / `127.0.0.1:8081` | [cache_demo.py](examples/cache_demo.py) |
+| 만료 청소 | 한 회 작업 후 100ms 대기, 회차당 최대 100키·100버킷 검사 | [expiration.py](mini_redis/expiration.py), [store.py](mini_redis/store.py) |
+| 입력 크기 | UTF-8 키 1 KiB, 값 1 MiB, HTTP 본문 8 MiB | [api.py](mini_redis/api.py), [store.py](mini_redis/store.py) |
+
+- 같은 컴퓨터에서 사용하는 구성이며 인증·외부 공개용 설정은 제공하지 않습니다.
+- 데이터는 RAM에만 보관합니다. 재시작 복구·영속성은 구현하지 않았습니다.
+- 프로세스를 여러 개 실행하면 저장소도 각각 분리됩니다.
+- 실제 Redis의 RESP 프로토콜과 `redis-cli`는 지원하지 않습니다. 문자열 외 자료형·트랜잭션·전체 메모리 한도도 구현하지 않았습니다.
+- 만료 여부는 조회 시에도 검사합니다. 청소 작업이 모든 만료 노드를 100ms 안에 제거한다는 보장은 없습니다.
+
+### 자주 생기는 오류
+
+| 증상 | 확인할 내용 |
+| --- | --- |
+| `python` 명령을 찾지 못함 | Python 설치와 명령 경로를 확인하고 `python --version`을 실행하세요. |
+| `.venv` 실행 파일을 찾지 못함 | 프로젝트 루트인지, 가상환경 생성이 성공했는지 확인하세요. |
+| `No module named flask` 또는 `waitress` | `.venv`의 Python으로 의존성 설치 명령을 실행했는지 확인하세요. |
+| 서버 시작 시 포트 사용 중 오류 | 같은 서버를 이미 실행했는지 확인하세요. 캐시 시연에서는 기존 Mini Redis를 그대로 사용합니다. |
+| 요청 연결 실패 | 해당 서버 창이 열려 있는지, 주소·포트가 맞는지 확인하세요. |
+| 400 / 413 / 415 응답 | 각각 입력 형식·크기·Content-Type을 [API 규격](docs/API.md)과 비교하세요. |
+| 예제 화면에서 502 응답 | Mini Redis와 원본 상품 API가 모두 실행 중인지 확인하세요. |
 
 ## HTTP API
 
@@ -54,7 +102,7 @@ Invoke-RestMethod http://127.0.0.1:8080/delete -Method Post -ContentType 'applic
 
 ## 상품 캐시 예제
 
-설치 후 별도 PowerShell 창 3개에서 각각 실행합니다.
+프로젝트 루트에서 PowerShell 창 3개를 열고 각각 실행합니다. 빠른 시작에서 띄운 Mini Redis가 실행 중이면 창 1은 그대로 사용하세요.
 
 ```powershell
 # 창 1: Mini Redis (8080)
@@ -86,7 +134,7 @@ Invoke-RestMethod http://127.0.0.1:8080/delete -Method Post -ContentType 'applic
 
 ## 시연과 검증 화면
 
-실제 브라우저에서 캡처했습니다. 시연의 개별 처리 시간과 아래 20회 평균 왕복 시간은 다른 측정입니다.
+실제 브라우저에서 캡처했습니다. 시연의 개별 처리 시간과 위 표의 20회 평균 왕복 시간은 다른 측정입니다.
 
 <details>
 <summary>캐시 미사용 → MISS → HIT 시연 보기</summary>
@@ -124,75 +172,29 @@ HIT 행에서 원본 호출 횟수가 2회로 유지됩니다.
 
 ```text
 main-redis/
-├─ mini_redis/             실제 저장소 구현
-│  ├─ __init__.py          패키지 선언, 서버·스레드 시작 없음
-│  ├─ store.py             해시·노드·저장소·TTL·제한된 청소
-│  ├─ expiration.py        명시적으로 시작·종료하는 청소 스레드
-│  ├─ api.py               JSON 입력 검사·HTTP 경로·응답
-│  └─ server.py            저장소·청소 생성과 Waitress 실행 진입점
-├─ tests/
-│  ├─ test_store.py        기본 저장소·입력·확장 테스트
-│  ├─ test_ttl.py          시간 주입을 사용한 TTL 테스트
-│  ├─ test_cleanup.py      청소·커서·갱신 겹침·생명주기 테스트
-│  ├─ test_concurrency.py  여러 스레드의 요청·락·일관성 검사
-│  ├─ test_cleanup_focus.py  필수 흐름 하나를 집중 검증
-│  ├─ test_api.py          Flask 요청·오류·TTL 연결 검사
-│  ├─ test_server.py       실제 Waitress 연결·본문 제한·종료 검사
-│  ├─ test_cache_demo.py   실제 HTTP 캐시 동작 검사
-│  ├─ measure_cache.py     20회씩 순차 HTTP 성능 비교
-│  └─ load_cleanup.py      명시적으로 실행하는 청소 부하 실험
-├─ examples/              Mini Redis를 HTTP로 사용하는 상품 캐시 예제
-│  ├─ cache_demo.py        원본 API·예제 서버
-│  └─ cache.html           캐시 사용·미사용·삭제 관찰 화면
-├─ docs/                  요구사항·설계·API·검증 계획
-├─ history/               단위별 실행·실패·수정·재검증 기록
-├─ study/                 개념 학습 노트
-├─ requirements.txt       Flask·Waitress 직접 의존성
-├─ AGENTS.md              AI 작업 규칙과 읽는 순서
-└─ WORKLOG.md             현재 상태와 다음 작업
+├─ mini_redis/        저장소·TTL 청소·HTTP API·서버 실행
+├─ examples/          원본 상품 API와 캐시 시연 화면
+├─ tests/             자동 테스트·별도 부하 및 성능 측정 코드
+├─ docs/              요구사항·설계·API·검증 계획
+├─ history/           단위별 실행 과정·결과·측정값·스크린샷
+├─ study/             개념 학습 노트
+├─ requirements.txt  Flask·Waitress 버전
+├─ AGENTS.md          AI 작업 안내
+└─ WORKLOG.md         작업 상태와 인계 기록
 ```
 
-구현은 `mini_redis/`, 자동 검사는 `tests/`, 과정 설명은 `history/`에 둡니다. 테스트 파일은 기능·검증 목적에 맞춰 나누며 구현 단위마다 반드시 하나씩 만들지는 않습니다. HTTP 처리는 api.py, 실행은 server.py에 둡니다. 캐시 예제는 examples/에 두고 저장 엔진과 분리합니다.
+HTTP 진입점은 [api.py](mini_redis/api.py), 저장소 핵심은 [store.py](mini_redis/store.py), 서버 실행은 [server.py](mini_redis/server.py)에서 확인할 수 있습니다. 저장소는 FNV-1a 64비트 해시와 체이닝을 사용하며, 초기 16버킷에서 신규 키로 적재율이 0.75를 초과하면 버킷을 두 배로 늘려 다시 배치합니다.
 
-## 프로젝트 문서
+## 문서 안내
 
-| 읽을 목적 | 문서 |
+| 알고 싶은 내용 | 문서 |
 | --- | --- |
-| AI가 이어서 작업하기 | [AGENTS.md](AGENTS.md) → [현재 작업 인계](WORKLOG.md) |
-| 전체 문서의 역할·읽는 순서 | [docs/README.md](docs/README.md) |
-| 과제와 프로젝트 범위 | [과제](docs/assignment.md) · [프로젝트 개요](docs/PROJECT.md) |
-| 기대 동작과 통과 조건 | [REQUIREMENTS.md](docs/REQUIREMENTS.md) |
-| 구조와 상태 소유 | [DESIGN.md](docs/DESIGN.md) |
-| 선택 이유·대안·한계 | [DECISIONS.md](docs/DECISIONS.md) |
-| HTTP 요청·응답 | [API.md](docs/API.md) |
-| 구현 단위와 필수 테스트 | [TESTING.md](docs/TESTING.md) |
-| 단위별 구현·테스트 이력 | [history/README.md](history/README.md) |
-| 함께 검토·기록하는 방법 | [WORKFLOW.md](docs/WORKFLOW.md) |
+| 전체 문서의 역할·읽는 순서 | [문서 목차](docs/README.md) |
+| 프로젝트 목표와 범위 | [프로젝트 개요](docs/PROJECT.md) · [과제 요구](docs/assignment.md) |
+| 기대 동작·설계·선택 이유 | [요구사항](docs/REQUIREMENTS.md) · [설계](docs/DESIGN.md) · [선택 이유와 대안](docs/DECISIONS.md) |
+| API 입력과 응답 | [API 규격](docs/API.md) |
+| 테스트 계획과 실제 실행 결과 | [테스트 계획](docs/TESTING.md) · [단위별 기록](history/README.md) |
+| 함께 작업하는 방법 | [작업 방식](docs/WORKFLOW.md) · [AI 안내](AGENTS.md) · [작업 인계](WORKLOG.md) |
+| Redis 개념 공부 | [학습 목차](study/00-overview.md) |
 
-## 구현한 설계
-
-- FNV-1a 64비트, 연결 리스트 체이닝, 초기 16버킷. 신규 키로 적재율 0.75 초과 시 2배 전체 리해싱.
-- 단일 프로세스·저장소 하나·공용 락 하나. 요청 워커 4개와 청소 스레드 1개가 공유합니다.
-- UTF-8 문자열 키 최대 1 KiB, 값 최대 1 MiB. 빈 문자열과 원문 공백을 허용합니다.
-- TTL은 양의 정수 밀리초, 단조 시간으로 판단합니다. 접근 검사와 목표 100ms 주기의 제한된 청소를 함께 사용합니다.
-- POST /set, /get, /delete. 키는 JSON 본문에 전달합니다. 기본 주소 127.0.0.1:8080, 본문 최대 8 MiB.
-- 영속성은 첫 범위에서 제외합니다. 서버 종료 시 데이터가 사라집니다.
-
-숫자는 합의한 초기 설정입니다. 최적값이나 모든 만료 키의 100ms 내 회수를 보장하지 않습니다.
-
-
-## 학습 문서
-
-[학습 목차](study/00-overview.md)에서 Redis의 필요성 → 키·값과 캐시 → 해시 테이블 → TTL → 서버·동시성 → 메모리·영속성 → 선택 기록 → 검증 순서로 읽을 수 있습니다. 개념 설명과 제품 계약을 구분합니다.
-
-## 제한 사항
-
-- 데이터는 RAM에만 보관합니다. 재시작 복구·영속성은 이번 1차 범위에서 제외했습니다.
-- 기본 바인딩은 `127.0.0.1`입니다. 인증과 다른 컴퓨터에 공개하는 설정은 제공하지 않습니다.
-- 한 프로세스에서 저장소 하나를 공유합니다. 프로세스를 여러 개 실행하면 데이터도 각각 분리됩니다.
-- RESP·`redis-cli` 호환, 트랜잭션, 추가 자료형, 전체 메모리 한도와 과부하 정책은 구현하지 않았습니다.
-- 캐시 비교는 단일 상품·50ms 인위적 원본 대기·순차 요청 조건입니다. 실제 DB나 동시 부하의 성능을 보장하지 않습니다.
-
-## 저장소 안내
-
-[팀 저장소](https://github.com/WEEK11-12/mini-redis)의 개인 포크이며 실제 프로젝트의 기준 브랜치는 main입니다. 학습 필기도 같은 main의 study/ 폴더에서 함께 관리합니다. 기존 study-jye 브랜치는 과거 기록으로 보존합니다. 두 사람 모두 Redis와 DBMS 전 과정을 경험하되 DBMS는 별도 프로젝트로 관리합니다. 개인 포크 변경이 팀 저장소에 자동으로 반영되지는 않습니다.
+개인 저장소는 [jye-1123/mini-redis](https://github.com/jye-1123/mini-redis)의 `main`, 팀 공유 브랜치는 [WEEK11-12/mini-redis의 yeongeun-main](https://github.com/WEEK11-12/mini-redis/tree/yeongeun-main)입니다.
