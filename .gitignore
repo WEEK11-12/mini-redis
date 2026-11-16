@@ -1,2 +1,4 @@
-
-/study/learning-progress.md
+# Agent-only instructions and local cross-session context.
+# Human-facing documentation stays versioned under docs/.
+AGENTS.md
+/.agent/
