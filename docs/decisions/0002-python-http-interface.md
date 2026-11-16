@@ -5,7 +5,7 @@
 - 작성일: 2026-11-17
 - 결정일: 2026-11-17
 - 결정자: 사용자
-- 확인 근거: 구현 가능성을 우선해 Python과 HTTP API로 진행한다는 사용자 선택
+- 확인 근거: 구현 가능성을 우선한 Python과 HTTP API 선택
 - 관련 문서: [1단계 목표·범위](../iterations/01-scope-and-contract/overview.md), [과제 원문](../assignment.md)
 - 대체 관계: 없음
 

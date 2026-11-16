@@ -5,7 +5,7 @@
 - 작성일: 2026-11-17
 - 결정일: 2026-11-17
 - 결정자: 사용자
-- 확인 근거: 기본 HTTP 응답안 및 비어 있지 않은 문자열 키·만료 키의 미존재 취급에 대한 사용자 확인
+- 확인 근거: 기본 HTTP 응답안 및 비어 있지 않은 문자열 키·만료 키의 미존재 취급 확정
 - 관련 문서: [1단계 목표·범위](../iterations/01-scope-and-contract/overview.md), [Python·HTTP API 결정](0002-python-http-interface.md)
 - 대체 관계: 없음
 
