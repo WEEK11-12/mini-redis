@@ -7,6 +7,7 @@
 - [과제 원문](docs/assignment.md)
 - [문서·코드·진행 컨벤션](docs/conventions.md) — 초기안, 검토 대기
 - [구현 단위 가이드](docs/plans/implementation-units.md) — 작업 순서 제안
+- [단계별 구현·검증 산출물 가이드](docs/plans/iteration-deliverables.md) — TC 선행, 구현·실행 결과 기록 방법
 - [단계별 요구사항 색인](docs/iterations/README.md) — 단위별 명세·ID 찾아보기
 - [진행 현황](docs/plans/progress.md) — 현재 위치·다음 확인 지점
 - [1단계 목표·범위·공유 계약](docs/iterations/01-scope-and-contract/overview.md) — 범위·계약 확정, 구현 전제
