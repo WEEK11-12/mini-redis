@@ -9,8 +9,8 @@
 
 - **완료로 확인된 것:** Redis 이론 학습, 공유 구현 단위 가이드 작성. 학습과 가이드 작성은 구현·테스트 완료가 아니다.
 - **현재 작업 단위:** [1단계 범위·공유 계약](../iterations/01-scope-and-contract/overview.md)은 범위·계약 확정으로 완료했다(구현 완료 아님). [2단계 요구사항 명세](../iterations/02-hash-table/requirements.md)의 범위를 확정하고 [설계 문서](../iterations/02-hash-table/design.md)의 계약 검토를 마쳤다. 인수 조건은 아직 실행 검증하지 않았다.
-- **다음 확인 지점:** [2단계 요구사항](../iterations/02-hash-table/requirements.md)과 [설계 문서](../iterations/02-hash-table/design.md)를 기준으로 [산출물 가이드](iteration-deliverables.md)에 따라 단위 TC를 먼저 작성한 뒤 구현·실행 결과를 각각 기록한다. 키의 URL 표현, TTL 설정·내부 만료 처리는 후속 단위에서 구체화한다.
-- **구현·테스트 근거:** 아직 없음. 현재 브랜치에서 구현 코드나 테스트 실행 결과를 확인하지 못했다.
+- **다음 확인 지점:** [2단계 TC](../iterations/02-hash-table/test-cases.md)와 계약 테스트 코드 `tests/test_store.py`의 임시 구현 접점을 검토한 뒤, 구현·실행 결과를 각각 기록한다. 키의 URL 표현, TTL 설정·내부 만료 처리는 후속 단위에서 구체화한다.
+- **구현·테스트 근거:** 구현 코드는 아직 없다. TC 문서·테스트 코드 초안은 작성했으나 인수 조건의 실행 통과 결과는 없다.
 
 ## 전체 흐름
 
@@ -23,7 +23,7 @@
 | 단위 | 현재 상태 | 다음 확인할 결과 | 실제 근거 |
 | --- | --- | --- | --- |
 | 1. 최소 범위·공유 인터페이스 | 완료 — 과제 대응·최소 경계 확정 | 2단계에서 기본 계약 적용 | [1단계 범위·체크리스트](../iterations/01-scope-and-contract/overview.md), [D-0002](../decisions/0002-python-http-interface.md), [D-0003](../decisions/0003-http-response-contract.md); 구현·테스트 근거 없음 |
-| 2. 해시 테이블 저장소 | 진행 중 — 설계 문서 검토 완료; TC·구현 미착수 | TC 작성 → 구현·단위 테스트 → 결과 확인 | [요구사항 명세](../iterations/02-hash-table/requirements.md), [설계 문서](../iterations/02-hash-table/design.md), [2단계 진행](../iterations/02-hash-table/overview.md#3-설계-검토--문서-계약-검토-완료); 실행 근거 없음 |
+| 2. 해시 테이블 저장소 | 진행 중 — 설계 검토·TC 초안 작성; 구현 미착수 | 임시 테스트 접점 검토 → 구현·단위 테스트 → 결과 확인 | [요구사항 명세](../iterations/02-hash-table/requirements.md), [설계 문서](../iterations/02-hash-table/design.md), [2단계 TC](../iterations/02-hash-table/test-cases.md); 인수 실행 근거 없음 |
 | 3. 외부 사용·API 응답 재사용 | 대기 — 1·2 선행 | 외부 호출 및 저장 후 재사용 기능 테스트 | 없음 |
 | 4. 만료·무효화 | 대기 — 저장소·외부 계약 선행 | 만료/무효화 동작과 경계 테스트 | 없음 |
 | 5. 동시성 점검·방어 | 대기 — 실행 구조·상태 변경 경로 확인 선행 | 위험 판단 근거, 필요한 방어와 기대 최종 상태 검증 | 없음 |
