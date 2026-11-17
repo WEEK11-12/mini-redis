@@ -1,6 +1,6 @@
 # 4단계 요구사항 명세서 — 만료와 명시적 무효화
 
-- 상태: 4단계 범위·인수 조건 확정 — 설계 검토·구현 전 TC 목록 작성, 구현·실행 검증 전
+- 상태: 4단계 범위·인수 조건 확정 — 구현·실행 및 제한 독립 재검토 결과는 [검증 기록](verification.md) 참조
 - 적용 범위: 기존 해시 테이블 저장소와 HTTP 사용 경로에서 보관 기간 만료 및 명시적 무효화의 동작을 제공·검증한다. 동시성 방어(5단계), 전체 종단 간·성능 비교(6단계), Optional 영속성은 이번 인수 범위가 아니다.
 - 근거: [과제 원문](../../assignment.md), [1단계 공유 계약](../01-scope-and-contract/overview.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0005 HTTP 경계](../../decisions/0005-http-api-boundary.md), [D-0006 TTL·무효화 계약](../../decisions/0006-ttl-invalidation-contract.md), [2단계 저장소 요구사항](../02-hash-table/requirements.md), [3단계 HTTP 요구사항](../03-http-api/requirements.md), [4단계 개요](overview.md), [구현 단위 가이드](../../plans/implementation-units.md)
 
@@ -8,7 +8,7 @@
 
 - ID는 `REQ-04-001`처럼 단계 번호와 일련번호로 고정한다. **명세**는 기대 동작, **인수 조건**은 나중에 실행으로 확인할 기준이다. 범위 확정은 구현·테스트 통과의 증거가 아니다.
 - [D-0006](../../decisions/0006-ttl-invalidation-contract.md)에 따라 기존 `PUT` 본문은 문자열 `value` 필드 하나만 허용한다. TTL은 별도 연산으로 설정·갱신·제거한다. 구체적인 경로·메서드·응답과 만료 시각 계산·물리적 정리는 설계에서 정한다.
-- 구현 전 TC 목록은 설계 검토 후 [테스트 케이스](test-cases.md)에 기록했다. 실제 변경과 실행 결과는 각각 `implementation.md`·`verification.md`에 기록하며 두 파일은 작성 전이다. [단계별 산출물 가이드](../../plans/iteration-deliverables.md)를 따른다.
+- 구현 전 TC 목록은 설계 검토 후 [테스트 케이스](test-cases.md)에 기록했다. 실제 변경과 실행 결과는 각각 [구현 기록](implementation.md)·[검증 기록](verification.md)에 남겼다. [단계별 산출물 가이드](../../plans/iteration-deliverables.md)를 따른다.
 
 ## 기능 요구사항
 

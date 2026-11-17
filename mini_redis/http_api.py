@@ -3,6 +3,8 @@
 import argparse
 import json
 import re
+import sys
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from .store import HashTableStore
@@ -11,6 +13,14 @@ from .store import HashTableStore
 _KEY = re.compile(r"[A-Za-z0-9_.~-]+\Z")
 _LENGTH = re.compile(r"[0-9]+\Z")
 _MAX_BODY = 65536
+
+def _json_integer(digits):
+    # Avoid the interpreter's decimal-to-int digit cap for valid bounded JSON bodies.
+    value = 0
+    negative = digits.startswith("-")
+    for digit in digits[negative:]:
+        value = value * 10 + ord(digit) - ord("0")
+    return -value if negative else value
 
 
 def create_server(host, port, store):
@@ -47,7 +57,7 @@ def create_server(host, port, store):
         def _error(self, status, code, *, allow=None):
             self._send(status, {"error": {"code": code}}, allow=allow)
 
-        def _value(self):
+        def _value(self, field="value"):
             # Reject ambiguous framing before reading any body bytes.
             lengths = self.headers.get_all("Content-Length", [])
             if self.headers.get_all("Transfer-Encoding") or len(lengths) != 1 or not _LENGTH.fullmatch(lengths[0]):
@@ -64,10 +74,14 @@ def create_server(host, port, store):
                 body = self.rfile.read(length)
                 if len(body) != length:
                     return None
-                value = json.loads(body.decode("utf-8"))
+                value = json.loads(body.decode("utf-8"), parse_int=_json_integer)
             except (OSError, UnicodeError, ValueError):
                 return None
-            if not isinstance(value, dict) or set(value) != {"value"} or not isinstance(value["value"], str):
+            if not isinstance(value, dict) or set(value) != {field}:
+                return None
+            if field == "value" and not isinstance(value[field], str):
+                return None
+            if field == "ttl_seconds" and (type(value[field]) is not int or value[field] <= 0):
                 return None
             return value
 
@@ -78,11 +92,12 @@ def create_server(host, port, store):
                 return
             suffix = path[len("/keys/"):]
             exists = suffix.endswith("/exists")
-            key = suffix[:-len("/exists")] if exists else suffix
+            ttl = suffix.endswith("/ttl")
+            key = suffix[:-len("/exists")] if exists else suffix[:-len("/ttl")] if ttl else suffix
             if not _KEY.fullmatch(key) or key in (".", ".."):
                 self._error(400, "INVALID_KEY")
                 return
-            allow = "GET" if exists else "GET, PUT, DELETE"
+            allow = "GET" if exists else "PUT, DELETE" if ttl else "GET, PUT, DELETE"
             if self.command not in allow.split(", "):
                 self._error(405, "METHOD_NOT_ALLOWED", allow=allow)
                 return
@@ -91,13 +106,21 @@ def create_server(host, port, store):
                 return
             value = None
             if self.command == "PUT":
-                value = self._value()
+                value = self._value("ttl_seconds" if ttl else "value")
                 if value is None:
                     self._error(400, "INVALID_BODY")
                     return
             try:
                 if exists:
                     payload = {"exists": store.exists(key)}
+                elif ttl and self.command == "PUT":
+                    assert value is not None
+                    if not store.set_ttl(key, value["ttl_seconds"]):
+                        self._error(404, "KEY_NOT_FOUND")
+                        return
+                    payload = {"ttl_set": True}
+                elif ttl:
+                    payload = {"ttl_removed": store.clear_ttl(key)}
                 elif self.command == "GET":
                     found, stored_value = store.get(key)
                     if not found:
@@ -119,7 +142,24 @@ def create_server(host, port, store):
         def log_message(self, format, *args):
             pass
 
-    return HTTPServer((host, port), Handler)
+    class Server(HTTPServer):
+        def __init__(self, address, handler):
+            super().__init__(address, handler)
+            self._next_sweep = time.monotonic() + 1
+
+        def service_actions(self):
+            now = time.monotonic()
+            if now >= self._next_sweep:
+                self._next_sweep = now + 1
+                try:
+                    store.sweep_expired()
+                except Exception as exc:
+                    try:
+                        print(f"expiration sweep failed: {exc!r}", file=sys.stderr)
+                    except Exception:
+                        pass
+
+    return Server((host, port), Handler)
 
 
 def main():

@@ -14,13 +14,15 @@
 
 ## 현재 출발점
 
-가벼운 범용 인메모리 캐시 서비스를 목표로 하며, 과제의 Optional 항목을 제외한 요구를 구현 범위에 포함합니다. 여러 애플리케이션 서버에서 공통으로 접근하는 사용 장면을 상정하고 [Python·HTTP API](docs/decisions/0002-python-http-interface.md)를 채택했습니다. [1단계 공유 계약](docs/iterations/01-scope-and-contract/overview.md)과 [2단계 저장소](docs/iterations/02-hash-table/overview.md), [3단계 HTTP 연결·응답 재사용](docs/iterations/03-http-api/overview.md)을 각 범위에서 완료했습니다. 최신 HTTP 32개·저장소 24개 공식 테스트가 통과하고 3단계 독립 검토 승인을 받았습니다. 실행 방법·검증 범위는 [구현 기록](docs/iterations/03-http-api/implementation.md)과 [검증 기록](docs/iterations/03-http-api/verification.md)에 있습니다. [4단계 만료·무효화 요구사항](docs/iterations/04-expiration-invalidation/requirements.md)은 확정했고 설계·구현·검증은 아직입니다. 동시성 및 성능 비교도 아직 구현·검증하지 않았습니다.
+가벼운 범용 인메모리 캐시 서비스를 목표로 하며, 과제의 Optional 항목을 제외한 요구를 구현 범위에 포함합니다. 여러 애플리케이션 서버에서 공통으로 접근하는 사용 장면을 상정하고 [Python·HTTP API](docs/decisions/0002-python-http-interface.md)를 채택했습니다. 1~3단계의 각 범위와 [4단계 만료·무효화](docs/iterations/04-expiration-invalidation/overview.md)의 구현·제한 독립 검토를 완료했습니다. 단계별 테스트 실행 시점, 첫 검토의 수정 요청과 재검토 판정은 [4단계 검증 기록](docs/iterations/04-expiration-invalidation/verification.md)에 있습니다. 동시성 방어와 전체 성능 비교는 후속 단계입니다. 이 상태 설명은 검토된 제품·테스트 소스 snapshot 이후 갱신했습니다.
 
 저장소 루트에서 Python 3으로 다음 명령을 각각 실행해 현재 단계의 테스트를 확인할 수 있습니다. Mini Redis·원본 API·one-shot 클라이언트 실행 명령은 [3단계 구현 기록](docs/iterations/03-http-api/implementation.md#실행-방법)에 있습니다.
 
 ```sh
 python3 -m unittest discover -s tests -p 'test_http_api.py' -q
 python3 -m unittest discover -s tests -p 'test_store.py' -q
+python3 -m unittest discover -s tests -p 'test_expiration_store.py' -q
+python3 -m unittest discover -s tests -p 'test_expiration_http.py' -q
 ```
 
 문서는 작성자가 아니라 독자와 목적을 기준으로 구분합니다. 사람이 참고하는 문서는 `docs/`에서 Git으로 관리하고, 에이전트 전용 진입 안내(`AGENTS.md`)와 작업 맥락(`.agent/`)은 Git에서 제외합니다. 로컬 안내가 없는 환경에서는 컨벤션 문서의 협업 규칙을 기준으로 다시 생성합니다.

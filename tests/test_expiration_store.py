@@ -222,6 +222,34 @@ class ExpirationStoreTests(unittest.TestCase):
         self.assertEqual(self.store.get("a"), (False, None))
         self.assertEqual(self.store.get("b"), (False, None))
 
+    def test_counter_failure_does_not_commit_expired_or_direct_removal(self):
+        class FailingCount(int):
+            def __sub__(self, other):
+                raise MemoryError("counter allocation")
+
+        for operation in ("get", "exists", "delete", "set_ttl", "clear_ttl", "sweep_expired", "direct_delete"):
+            with self.subTest(operation=operation):
+                clock = Clock()
+                store = HashTableStore(clock=clock)
+                store.set("k", "old")
+                if operation != "direct_delete":
+                    store.set_ttl("k", 1)
+                    clock.now += SECOND
+                before = (store._size, tuple(tuple(chain) for chain in store._buckets))
+                with patch.object(store, "_size", FailingCount(store._size)):
+                    with self.assertRaises(MemoryError):
+                        if operation == "set_ttl":
+                            store.set_ttl("k", 2)
+                        elif operation == "direct_delete":
+                            store.delete("k")
+                        elif operation == "sweep_expired":
+                            store.sweep_expired()
+                        else:
+                            getattr(store, operation)("k")
+                    self.assertEqual(store._size, before[0])
+                    self.assertEqual(tuple(tuple(chain) for chain in store._buckets), before[1])
+                self.assertEqual(store.delete("k") if operation == "direct_delete" else store.sweep_expired(), True if operation == "direct_delete" else 1)
+
     def test_u_013_clock_failure_propagates_without_guessing(self):
         self.put_ttl()
         before = self.physical()
