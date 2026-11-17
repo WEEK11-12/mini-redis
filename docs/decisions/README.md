@@ -10,8 +10,9 @@
 | 0002 | 설계 | [Python과 HTTP API 채택](0002-python-http-interface.md) | 채택 | 구현 가능성을 우선한 기술·외부 인터페이스 선택 |
 | 0003 | 설계 | [공유 캐시의 기본 HTTP 계약](0003-http-response-contract.md) | 채택 | 키·값·만료 응답과 HTTP 상태 코드의 공유 계약 |
 | 0004 | 설계 | [HTTP 키에서 슬래시 제외](0004-http-key-no-slash.md) | 채택 | 외부 키의 경로 제약과 서버 검증 책임 |
-| 0005 | 설계 | [외부 HTTP API의 추가 입력·라우팅 경계](0005-http-api-boundary.md) | 채택 | 후속 단계에도 적용할 키·본문·오류 계약 |
+| 0005 | 설계 | [외부 HTTP API의 추가 입력·라우팅 경계](0005-http-api-boundary.md) | 채택 (실행 구조만 D-0007로 변경) | 후속 단계에도 적용할 키·본문·오류 계약 |
 | 0006 | 설계 | [TTL 입력과 명시적 무효화 계약](0006-ttl-invalidation-contract.md) | 채택 | 별도 TTL 연산·양의 정수 초·일반 PUT의 TTL 해제·기존 DELETE 재사용 |
+| 0007 | 설계 | [병렬 HTTP 해석과 단일 스레드 명령 실행 경계](0007-single-thread-command-execution.md) | 채택 | HTTP 해석 병렬화 허용·저장소 명령과 정리의 단일 실행 스레드 |
 
 컨벤션의 세부 경로·양식·코드 규칙은 [초기안](../conventions.md)이며, 이 목록의 채택 상태가 초기안 전체의 승인을 의미하지 않는다.
 
