@@ -2,3 +2,5 @@
 # Human-facing documentation stays versioned under docs/.
 AGENTS.md
 /.agent/
+__pycache__/
+*.pyc
