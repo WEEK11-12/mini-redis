@@ -1,7 +1,7 @@
 # 3단계: 외부 HTTP 사용 경로와 API 응답 재사용
 
 - 문서 상태: 요구사항 범위·설계 계약 확인 및 설계 검토 반영 완료
-- 단계 상태: 진행 중 — 설계까지 완료; 구현 전 TC·구현·통합 검증 전
+- 단계 상태: 진행 중 — 구현 전 TC 목록 및 테스트 코드 작성; HTTP 기능·통합 검증 전
 - 근거: [과제 원문](../../assignment.md), [1단계 범위·공유 계약](../01-scope-and-contract/overview.md), [3단계 요구사항 명세](requirements.md), [D-0002 Python·HTTP API](../../decisions/0002-python-http-interface.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0004 HTTP 키 제약](../../decisions/0004-http-key-no-slash.md), [D-0005 3단계 HTTP 경계](../../decisions/0005-http-api-boundary.md), [2단계 저장소](../02-hash-table/overview.md), [구현 단위 가이드](../../plans/implementation-units.md)
 
 ## 이 단계의 문서 길잡이
@@ -12,7 +12,7 @@
 | --- | --- |
 | [요구사항 명세 (`requirements.md`)](requirements.md) | 확정된 이번 범위와 인수 조건. 1단계 공유 계약과 D-0005를 따른다. 실행 인수 확인은 별도다. |
 | [설계 문서 (`design.md`)](design.md) | 요구사항에 대응하는 HTTP·저장소 연결, 키·오류·예시 흐름과 선택 근거. 독립 설계 검토의 지적을 반영했다. |
-| 테스트 케이스 (`test-cases.md`) | 요구사항 ID와 설계 경계를 연결할 구현 전 검증 계획. 작성 전이며 통과 결과가 아니다. |
+| [테스트 케이스 (`test-cases.md`)](test-cases.md) | 요구사항 ID와 설계 경계를 연결한 구현 전 검증 계획. 테스트 코드·통과 결과와 구분한다. |
 | 구현 기록 (`implementation.md`) | 실제 코드와 설계 대비 구현 선택을 기록할 문서. 구현 전이다. |
 | 검증 기록 (`verification.md`) | 테스트 명령·환경·실제 결과와 검토 범위를 기록할 문서. 실행 전이다. |
 
@@ -25,7 +25,7 @@
 - [x] [요구사항 명세 (`requirements.md`)](requirements.md)의 목표·범위와 관찰 가능한 완료 조건을 확인한다. (실행 인수 확인은 별도)
 - [x] 키의 URL 표현·입력 검증·오류 매핑·HTTP 실행 구조 및 API 응답 재사용 사례를 [설계 문서 (`design.md`)](design.md)에 확정한다. (공통 HTTP 경계는 [D-0005](../../decisions/0005-http-api-boundary.md), 단계별 예시는 설계 문서 4절)
 - [x] 설계가 D-0003과 저장소 공개 계약을 충족하는지 독립 검토하고 지적된 전송 경계를 반영한다. ([설계 검토 결과](design.md#8-설계-검토-결과와-구현에-위임한-부분); 구현 결과 검토 아님)
-- [ ] 구현 전에 실제 저장소를 사용하는 HTTP 통합 TC와 API 응답 재사용 경로를 요구사항 ID에 연결해 테스트 케이스 (`test-cases.md`)에 기록한다.
+- [x] 구현 전에 실제 저장소를 사용하는 HTTP 통합 TC와 API 응답 재사용 경로를 요구사항 ID에 연결해 [테스트 케이스 (`test-cases.md`)](test-cases.md)에 기록한다. (목록 작성만 완료)
 - [ ] HTTP 처리부·사용 사례를 구현하고 실제 변경을 구현 기록 (`implementation.md`)에 남긴다.
 - [ ] 외부 요청으로 네 기본 연산과 빈 값·미존재·잘못된 입력·재사용 경로를 확인하고 2단계 저장소 단위 테스트도 재실행한다. 명령·환경·결과는 검증 기록 (`verification.md`)에 남긴다.
 - [ ] 결과·남은 위험과 4단계로 넘길 계약을 확인하고 [진행 현황](../../plans/progress.md)을 갱신한다.
@@ -52,9 +52,9 @@
 
 HTTP 처리부와 외부 사용 예제의 구현 기록은 아직 없다. 구현 후 실제 변경 경로와 설계 대비 선택을 구현 기록 (`implementation.md`)에 남긴다. 문서상의 설계만으로 동작 완료를 판단하지 않는다.
 
-## 5. 테스트·결과 확인 — TC 작성·실행 전
+## 5. 테스트·결과 확인 — TC 목록·테스트 코드 작성, 구현 검증 전
 
-구현 전에 요구사항별 HTTP 통합 TC와 API 응답 재사용 사례를 테스트 케이스 (`test-cases.md`)에 계획한다. 이후 실제 외부 요청과 2단계 저장소 단위 테스트를 실행하고 명령·조건·결과를 검증 기록 (`verification.md`)에 남긴다. 현재 3단계 HTTP 기능의 실행 결과는 없다.
+구현 전 요구사항별 HTTP 통합 TC와 API 응답 재사용 사례를 [테스트 케이스 (`test-cases.md`)](test-cases.md)에 정리하고 `tests/test_http_api.py`에 테스트 코드를 작성했다. 임시 서버 실행 접점이 없어 실제 HTTP 동작은 검증하지 않았다. 구현 후 외부 요청과 2단계 저장소 단위 테스트를 실행하고 명령·조건·결과를 검증 기록 (`verification.md`)에 남긴다.
 
 | 검증 대상 | 실행 시 확인할 관찰 결과 |
 | --- | --- |
@@ -65,4 +65,4 @@ HTTP 처리부와 외부 사용 예제의 구현 기록은 아직 없다. 구현
 
 ## 다음 확인 지점
 
-[요구사항 명세 (`requirements.md`)](requirements.md)와 [설계 문서 (`design.md`)](design.md)의 채택된 경계에 따라 구현 전 통합 TC를 작성한다. 특히 미지원 메서드·`HEAD`·비정상 길이/전송 인코딩과 원본 호출 횟수 관찰을 포함한다. HTTP 코드·통합 TC의 실행 결과는 아직 없다.
+[테스트 케이스 (`test-cases.md`)](test-cases.md)를 기준으로 HTTP 처리부·외부 사용 사례를 구현하고 이후 외부 요청으로 검증한다. HTTP 코드·통합 TC의 실행 결과는 아직 없다.
