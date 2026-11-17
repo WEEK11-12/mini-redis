@@ -1,7 +1,7 @@
 # 4단계 설계 — 만료와 명시적 무효화
 
 - 문서 상태: 설계 계약 — 독립 검토에서 차단 발견 없음; 비차단 의견 반영 부분 초점 재확인 완료
-- 단계 상태: 요구사항 범위 확정·설계 검토 완료, 구현 전 TC·구현·실행 검증 전
+- 단계 상태: 요구사항 범위 확정·설계 검토·구현 전 TC 목록 작성 완료, 구현·실행 검증 전
 - 근거: [4단계 요구사항](requirements.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0005 HTTP 경계](../../decisions/0005-http-api-boundary.md), [D-0006 TTL·무효화 계약](../../decisions/0006-ttl-invalidation-contract.md), [3단계 설계](../03-http-api/design.md), [2단계 설계](../02-hash-table/design.md)
 
 ## 한눈에 보는 구조와 흐름
@@ -105,7 +105,7 @@ HTTP 서버 인스턴스는 저장소 하나, 수신 소켓, 요청 사이의 �
 
 ## 6. 검증 지점과 구현 위임
 
-아래는 검증할 계약이지 실행 결과가 아니다. 구현 전 TC는 별도 `test-cases.md`, 실제 실행 결과는 `verification.md`에 기록한다.
+아래는 검증할 계약이지 실행 결과가 아니다. 구현 전 TC 목록은 [테스트 케이스](test-cases.md), 실제 실행 결과는 `verification.md`에 기록한다.
 
 | 요구사항 | 집중 확인할 결과 |
 | --- | --- |
