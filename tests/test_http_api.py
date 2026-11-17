@@ -390,6 +390,20 @@ class HTTPContractTests(unittest.TestCase):
                 set_value.assert_not_called()
         self.unchanged()
 
+    def test_i_017_long_zero_content_length_and_leading_zeros(self):
+        self.seeded()
+        fields = (b"Content-Type: application/json", b"Content-Length: " + b"0" * 5000)
+        with patch.object(self.store, "set", wraps=self.store.set) as set_value:
+            self.raw_error(raw(self.url, raw_put("/keys/kept", b"", *fields)), "INVALID_BODY")
+            set_value.assert_not_called()
+        self.unchanged()
+        body = b'{"value":"after"}'
+        fields = (b"Content-Type: application/json",
+                  b"Content-Length: " + b"0" * 5000 + str(len(body)).encode())
+        response = raw(self.url, raw_put("/keys/kept", body, *fields))
+        self.assertIn(b" 200 ", response.split(b"\r\n", 1)[0])
+        self.check("GET", "/keys/kept", 200, {"value": "after"})
+
     def test_i_018_transfer_encoding_rejected(self):
         self.seeded()
         for fields in ((b"Transfer-Encoding: chunked",),
@@ -543,6 +557,25 @@ class ExampleContractTests(unittest.TestCase):
             self.assertEqual(response.stdout, "")
         result(self, request(origin, "GET", "/origin-calls"), 200, {"count": 0}, no_store=False)
 
+    def test_e_003_cache_redirect_does_not_call_origin(self):
+        origin = self.start("examples.origin_api")
+
+        class Redirect(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(302)
+                self.send_header("Location", origin + "/items/demo")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+
+            def log_message(self, format, *args):
+                pass
+
+        with running(HTTPServer((HOST, 0), Redirect)) as cache:
+            response = self.client(cache, origin)
+        self.assertNotEqual(response.returncode, 0)
+        self.assertEqual(response.stdout, "")
+        result(self, request(origin, "GET", "/origin-calls"), 200, {"count": 0}, no_store=False)
+
     def fake(self, status, payload):
         class Handler(BaseHTTPRequestHandler):
             def do_GET(self):
@@ -636,6 +669,39 @@ class ExampleContractTests(unittest.TestCase):
                 self.assertNotEqual(response.returncode, 0)
                 self.assertEqual(response.stdout, "")
         result(self, request(origin, "GET", "/origin-calls"), 200, {"count": 3}, no_store=False)
+
+    def test_e_005_numeric_stored_is_not_true(self):
+        origin = self.start("examples.origin_api")
+        stored: list[object] = [None]
+
+        class Cache(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.reply(404, error("KEY_NOT_FOUND"))
+
+            def do_PUT(self):
+                self.reply(200, {"stored": stored[0]})
+
+            def reply(self, status, payload):
+                data = json.dumps(payload).encode()
+                self.send_response(status)
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def log_message(self, format, *args):
+                pass
+
+        server = HTTPServer((HOST, 0), Cache)
+        with running(server) as cache:
+            for value in (1, 1.0):
+                with self.subTest(value=value):
+                    stored[0] = value
+                    response = self.client(cache, origin)
+                    self.assertNotEqual(response.returncode, 0)
+                    self.assertEqual(response.stdout, "")
+            stored[0] = True
+            response = self.client(cache, origin)
+            self.assertEqual((response.returncode, response.stdout), (0, "sample-response\n"))
 
     def test_e_006_restart_resets_server_state(self):
         cache, origin = self.start("mini_redis.http_api"), self.start("examples.origin_api")

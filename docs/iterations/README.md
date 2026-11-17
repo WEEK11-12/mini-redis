@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | 1. 범위·공유 계약 | [1단계 계약](01-scope-and-contract/overview.md) | 별도 요구사항 ID 없음 | 범위·계약 확정; 후속 단계의 근거 |
 | 2. 해시 테이블 저장소 | [2단계 요구사항 명세](02-hash-table/requirements.md) | `REQ-02-001`~`REQ-02-008` | 범위 확정, 단위 검증 완료 ([단계 문서 길잡이](02-hash-table/overview.md#이-단계의-문서-길잡이)) |
-| 3. 외부 HTTP 사용·API 응답 재사용 | [3단계 요구사항 명세](03-http-api/requirements.md) | `REQ-03-001`~`REQ-03-008` | 범위·설계 확정, 구현·인수 검증 전 ([단계 개요](03-http-api/overview.md)) |
+| 3. 외부 HTTP 사용·API 응답 재사용 | [3단계 요구사항 명세](03-http-api/requirements.md) | `REQ-03-001`~`REQ-03-008` | 완료 — HTTP 32개·저장소 24개 통과, 독립 범위 승인 ([단계 개요](03-http-api/overview.md)) |
 | 4~6. 후속 단위 | 해당 단위 착수 시 작성 | 미부여 | 미착수 |
 
 새 단위를 시작할 때 같은 형식의 `requirements.md`를 작성하고 이 표에 실제 파일·ID 범위만 추가한다. 1단계는 공유 범위·계약 문서이므로 기존 문서에 소급하여 임의의 ID를 부여하지 않는다.

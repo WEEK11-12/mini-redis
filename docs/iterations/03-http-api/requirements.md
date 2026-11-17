@@ -1,6 +1,6 @@
 # 3단계 요구사항 명세서 — 외부 HTTP 사용과 API 응답 재사용
 
-- 상태: 3단계 범위·인수 조건 확인 완료 — 구현·실행 검증 전
+- 상태: 3단계 범위·인수 조건 확정 — 최신 공식 테스트 통과·독립 범위 승인
 - 적용 범위: HTTP 요청을 2단계 해시 테이블 저장소에 연결하고 API 응답을 저장·재사용하는 기능 사례. 실제 만료·무효화(4단계), 동시성 방어(5단계), 성능 비교·전체 검증(6단계)은 제외한다.
 - 근거: [과제 원문](../../assignment.md), [1단계 공유 계약](../01-scope-and-contract/overview.md), [D-0002 Python·HTTP API](../../decisions/0002-python-http-interface.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0004 HTTP 키 제약](../../decisions/0004-http-key-no-slash.md), [D-0005 3단계 HTTP 경계](../../decisions/0005-http-api-boundary.md), [2단계 저장소 요구사항](../02-hash-table/requirements.md), [3단계 설계](design.md), [3단계 개요](overview.md)
 
@@ -8,7 +8,7 @@
 
 - ID는 `REQ-03-001`처럼 단계 번호와 일련번호를 사용한다. 아래 **명세**는 이번 단계에서 기대하는 동작이고 **인수 조건**은 실행으로 확인할 기준이다. 현재 인수 조건을 통과했다는 뜻은 아니다.
 - 기존 기본 계약과 승인된 3단계 키·라우팅·본문·원본 예시의 경계를 반영했다. 자세한 경로 분류 우선순위와 실패·연결 처리, 실행 흐름은 [설계 문서](design.md)에 유지한다. 범위 확정은 인수 조건 통과의 증거가 아니다.
-- 구현 전 통합 TC 목록은 [테스트 케이스 (`test-cases.md`)](test-cases.md)에 기록하고 테스트 코드는 `tests/test_http_api.py`에 작성했다. 실제 HTTP 구현·검증 결과를 담을 `implementation.md`·`verification.md`는 작성 전이다. TC 작성은 동작 검증 결과가 아니다.
+- 구현 전 통합 TC 목록은 [테스트 케이스 (`test-cases.md`)](test-cases.md)에 기록하고 테스트 코드는 `tests/test_http_api.py`에 작성했다. 구현·자체 실행 및 제한 독립 검토 결과는 [구현 기록](implementation.md)·[검증 기록](verification.md)에 분리했다.
 
 ## 기능 요구사항
 

@@ -1,7 +1,7 @@
 # 3단계 설계 — HTTP 연결과 API 응답 재사용
 
-- 문서 상태: 설계 계약 확정·독립 검토 반영 완료 — 구현 검증 전
-- 단계 상태: 설계까지 완료; 구현·통합 검증 전
+- 문서 상태: 설계 계약 확정·독립 검토 반영 완료 — 구현자 점검 결과는 [검증 기록](verification.md) 참조
+- 단계 상태: 최신 공식 테스트 통과·독립 3단계 범위 승인
 - 근거: [3단계 요구사항](requirements.md), [1단계 공유 계약](../01-scope-and-contract/overview.md), [D-0002 Python·HTTP API](../../decisions/0002-python-http-interface.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0004 HTTP 키 제약](../../decisions/0004-http-key-no-slash.md), [D-0005 3단계 HTTP 경계](../../decisions/0005-http-api-boundary.md), [2단계 저장소 설계](../02-hash-table/design.md)
 
 ## 한눈에 보는 구조와 흐름
@@ -47,7 +47,7 @@ flowchart TD
 
 ## 1. 범위와 책임
 
-이번 단계는 2단계의 `HashTableStore`에 외부 HTTP 경로를 붙이고, 실제 외부 사용 예제에서 원본 API 응답의 첫 저장과 다음 요청의 재사용을 보여 준다. 확정된 범위와 관찰 가능한 인수 조건은 [요구사항 명세](requirements.md)에 있다. 구현·인수 검증은 아직 수행하지 않았다.
+이번 단계는 2단계의 `HashTableStore`에 외부 HTTP 경로를 붙이고, 실제 외부 사용 예제에서 원본 API 응답의 첫 저장과 다음 요청의 재사용을 보여 준다. 확정된 범위와 관찰 가능한 인수 조건은 [요구사항 명세](requirements.md)에 있다. 구현자 실행 결과는 [검증 기록](verification.md)에 있으며 독립 인수 판정은 아직 없다.
 
 | 구성 요소 | 책임과 경계 |
 | --- | --- |

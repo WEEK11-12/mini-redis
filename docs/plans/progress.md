@@ -1,6 +1,6 @@
 # Mini Redis 진행 현황
 
-- 문서 상태: 현황 기록 중 — 3단계 요구사항·설계 검토 완료
+- 문서 상태: 현황 기록 중 — 3단계 범위 독립 승인·최신 공식 테스트 통과
 - 확인일: 2026-11-17 (KST)
 - 목적: 전체 진행 흐름, 현재 작업, 막힌 결정과 검증 근거를 함께 확인한다. 일정표나 완료 예상표가 아니다.
 - 기준: [과제 원문](../assignment.md), [구현 단위 가이드](implementation-units.md), [사용자 주도 진행 원칙](../decisions/0001-project-workflow.md)
@@ -8,8 +8,8 @@
 ## 현재 위치
 
 - **완료로 확인된 것:** Redis 이론 학습, 공유 구현 단위 가이드 작성. 학습과 가이드 작성은 구현·테스트 완료가 아니다.
-- **현재 작업 단위:** [1단계 범위·공유 계약](../iterations/01-scope-and-contract/overview.md)과 [2단계 해시 테이블 저장소](../iterations/02-hash-table/overview.md)는 각자의 범위에서 완료했다. [3단계 외부 HTTP 연결](../iterations/03-http-api/overview.md)은 요구사항·설계 검토와 [구현 전 TC 목록](../iterations/03-http-api/test-cases.md)·테스트 코드 작성까지 진행했으며 HTTP 구현·통합 검증은 아직이다.
-- **다음 확인 지점:** 3단계 TC 목록을 기준으로 HTTP 연결과 예시를 구현한 뒤 외부 요청으로 검증한다. TTL 설정·내부 만료 처리는 후속 단위에서 다룬다.
+- **현재 작업 단위:** [1단계 범위·공유 계약](../iterations/01-scope-and-contract/overview.md), [2단계 해시 테이블 저장소](../iterations/02-hash-table/overview.md), [3단계 외부 HTTP 연결·API 응답 재사용](../iterations/03-http-api/overview.md)을 각각의 범위에서 완료했다. 최신 3단계 HTTP 32개·저장소 24개가 통과하고 독립 검토 승인을 받았다.
+- **다음 확인 지점:** 4단계 TTL·무효화의 범위와 계약을 검토한다. 3단계 고정 포트 수동 시연은 미실시이나 별도 프로세스 사용 사례는 공식 테스트로 확인했다.
 - **구현·테스트 근거:** [2단계 구현 기록 (`implementation.md`)](../iterations/02-hash-table/implementation.md)과 [2단계 검증 기록 (`verification.md`)](../iterations/02-hash-table/verification.md). 공식 24개 TC 통과·독립 검토 승인, 후속 기능 검증은 아님.
 
 ## 전체 흐름
@@ -24,7 +24,7 @@
 | --- | --- | --- | --- |
 | 1. 최소 범위·공유 인터페이스 | 완료 — 과제 대응·최소 경계 확정 | 2단계에서 기본 계약 적용 | [1단계 범위·체크리스트](../iterations/01-scope-and-contract/overview.md), [D-0002](../decisions/0002-python-http-interface.md), [D-0003](../decisions/0003-http-response-contract.md); 구현·테스트 근거 없음 |
 | 2. 해시 테이블 저장소 | 완료 — 공식 단위 TC 24개 통과·독립 검토 승인 | 3단계 연결 시 저장소 회귀 확인 | [단계 문서 길잡이](../iterations/02-hash-table/overview.md#이-단계의-문서-길잡이), [구현 기록 (`implementation.md`)](../iterations/02-hash-table/implementation.md), [검증 기록 (`verification.md`)](../iterations/02-hash-table/verification.md); HTTP·TTL·동시성은 미포함 |
-| 3. 외부 사용·API 응답 재사용 | 진행 중 — 설계·TC 목록·테스트 코드 작성, HTTP 기능 미구현 | 외부 호출과 저장·재사용 기능 구현·테스트 실행 | [3단계 개요](../iterations/03-http-api/overview.md), [TC 목록](../iterations/03-http-api/test-cases.md), `tests/test_http_api.py`; HTTP 구현·실행 근거 없음 |
+| 3. 외부 사용·API 응답 재사용 | 완료 — 최신 HTTP 32개·저장소 24개 통과, 독립 범위 승인 | 4단계 만료·무효화에서 기존 계약 연결 | [3단계 구현 기록](../iterations/03-http-api/implementation.md), [검증 기록](../iterations/03-http-api/verification.md); 고정 포트 수동 시연 미실시 |
 | 4. 만료·무효화 | 대기 — 저장소·외부 계약 선행 | 만료/무효화 동작과 경계 테스트 | 없음 |
 | 5. 동시성 점검·방어 | 대기 — 실행 구조·상태 변경 경로 확인 선행 | 위험 판단 근거, 필요한 방어와 기대 최종 상태 검증 | 없음 |
 | 6. 전체 통합·성능 검증 | 대기 — 실행 가능한 사례 선행 | 전체 흐름의 실행 결과, 동일 조건의 비교 결과와 한계 | 없음 |

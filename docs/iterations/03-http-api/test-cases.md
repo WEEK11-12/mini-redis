@@ -1,6 +1,6 @@
 # 3단계 테스트 케이스 — HTTP 연결과 API 응답 재사용
 
-- 상태: 구현 전 검증 계획 — `tests/test_http_api.py`에 임시 실행 접점의 테스트 코드 작성, 제품 동작 검증 전
+- 상태: 구현 전 검증 계획으로 작성; 구현자 실행·독립 제한 승인 결과는 [검증 기록](verification.md) 참조
 - 근거: [요구사항](requirements.md), [설계](design.md), [D-0003](../../decisions/0003-http-response-contract.md), [D-0005](../../decisions/0005-http-api-boundary.md), [산출물 가이드](../../plans/iteration-deliverables.md)
 - 유형: `I`는 외부 HTTP 요청과 실제 `HashTableStore`의 통합 검증, `E`는 별도 로컬 원본 API·Mini Redis·one-shot 클라이언트의 사용 사례. 별도 명시가 없으면 새 서버의 빈 저장소에서 시작한다. I-011·014·015·017·018·020과 I-021의 실패 PUT은 대상 키에 정상 PUT으로 구별 가능한 기존 값을 먼저 저장하고, 거부·실패 후 새 연결의 GET으로 동일 값을 확인한다. 응답 본문은 명시한 JSON 구조와 값으로 비교한다. `tests/test_http_api.py`의 `test_i_###`·`test_e_###`가 각각 같은 번호의 TC에 대응한다. 서버의 파일·실행 명령이 설계에서 미확정이므로 테스트 파일 상단의 모듈·팩터리·CLI 접점은 **임시 가정**이며 실제 구현에서 맞춘다. 실행 결과와 TC별 코드·명령은 구현 후 `verification.md`에 기록한다.
 
