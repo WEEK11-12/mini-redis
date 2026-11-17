@@ -1,6 +1,6 @@
 # Mini Redis 진행 현황
 
-- 문서 상태: 현황 기록 중 — 3단계 요구사항 초안 작성
+- 문서 상태: 현황 기록 중 — 3단계 요구사항·설계 검토 완료
 - 확인일: 2026-11-17 (KST)
 - 목적: 전체 진행 흐름, 현재 작업, 막힌 결정과 검증 근거를 함께 확인한다. 일정표나 완료 예상표가 아니다.
 - 기준: [과제 원문](../assignment.md), [구현 단위 가이드](implementation-units.md), [사용자 주도 진행 원칙](../decisions/0001-project-workflow.md)
@@ -8,8 +8,8 @@
 ## 현재 위치
 
 - **완료로 확인된 것:** Redis 이론 학습, 공유 구현 단위 가이드 작성. 학습과 가이드 작성은 구현·테스트 완료가 아니다.
-- **현재 작업 단위:** [1단계 범위·공유 계약](../iterations/01-scope-and-contract/overview.md)과 [2단계 해시 테이블 저장소](../iterations/02-hash-table/overview.md)는 각자의 범위에서 완료했다. [3단계 외부 HTTP 연결](../iterations/03-http-api/overview.md)은 [요구사항 초안](../iterations/03-http-api/requirements.md)을 작성했으며 범위 확정·설계·구현·통합 검증 전이다.
-- **다음 확인 지점:** 3단계 요구사항 초안의 나머지 범위·인수 조건을 검토한다. HTTP 키의 슬래시 제외와 작은 예시 API·원본 호출 횟수 관찰 방식은 확인했다. URL 라우팅과 오류 세부는 설계에서 다룬다. TTL 설정·내부 만료 처리는 후속 단위에서 다룬다.
+- **현재 작업 단위:** [1단계 범위·공유 계약](../iterations/01-scope-and-contract/overview.md)과 [2단계 해시 테이블 저장소](../iterations/02-hash-table/overview.md)는 각자의 범위에서 완료했다. [3단계 외부 HTTP 연결](../iterations/03-http-api/overview.md)은 [요구사항 명세](../iterations/03-http-api/requirements.md)·[설계 문서](../iterations/03-http-api/design.md)의 계약 확정과 독립 설계 검토 반영까지 완료했으며 구현 전 TC·구현·통합 검증은 아직이다.
+- **다음 확인 지점:** 3단계 채택 계약에 맞춰 요구사항 ID별 HTTP 통합·예시 재사용 TC를 구현 전에 작성한다. 미지원 메서드·원시 경로·비정상 본문 길이와 `HEAD` 경계를 포함한다. TTL 설정·내부 만료 처리는 후속 단위에서 다룬다.
 - **구현·테스트 근거:** [2단계 구현 기록 (`implementation.md`)](../iterations/02-hash-table/implementation.md)과 [2단계 검증 기록 (`verification.md`)](../iterations/02-hash-table/verification.md). 공식 24개 TC 통과·독립 검토 승인, 후속 기능 검증은 아님.
 
 ## 전체 흐름
@@ -24,7 +24,7 @@
 | --- | --- | --- | --- |
 | 1. 최소 범위·공유 인터페이스 | 완료 — 과제 대응·최소 경계 확정 | 2단계에서 기본 계약 적용 | [1단계 범위·체크리스트](../iterations/01-scope-and-contract/overview.md), [D-0002](../decisions/0002-python-http-interface.md), [D-0003](../decisions/0003-http-response-contract.md); 구현·테스트 근거 없음 |
 | 2. 해시 테이블 저장소 | 완료 — 공식 단위 TC 24개 통과·독립 검토 승인 | 3단계 연결 시 저장소 회귀 확인 | [단계 문서 길잡이](../iterations/02-hash-table/overview.md#이-단계의-문서-길잡이), [구현 기록 (`implementation.md`)](../iterations/02-hash-table/implementation.md), [검증 기록 (`verification.md`)](../iterations/02-hash-table/verification.md); HTTP·TTL·동시성은 미포함 |
-| 3. 외부 사용·API 응답 재사용 | 진행 중 — 요구사항 초안 작성, 기능은 미구현 | 범위·계약 확인 후 외부 호출 및 저장 후 재사용 기능 테스트 | [3단계 개요](../iterations/03-http-api/overview.md), [요구사항 초안](../iterations/03-http-api/requirements.md); 구현·테스트 근거 없음 |
+| 3. 외부 사용·API 응답 재사용 | 진행 중 — 요구사항·설계 계약 확인 및 독립 문서 검토 완료, 기능 미구현 | 구현 전 TC 작성 후 외부 호출과 저장·재사용 기능 테스트 | [3단계 개요](../iterations/03-http-api/overview.md), [요구사항 명세](../iterations/03-http-api/requirements.md), [설계 문서](../iterations/03-http-api/design.md), [D-0005](../decisions/0005-http-api-boundary.md); 구현·테스트 근거 없음 |
 | 4. 만료·무효화 | 대기 — 저장소·외부 계약 선행 | 만료/무효화 동작과 경계 테스트 | 없음 |
 | 5. 동시성 점검·방어 | 대기 — 실행 구조·상태 변경 경로 확인 선행 | 위험 판단 근거, 필요한 방어와 기대 최종 상태 검증 | 없음 |
 | 6. 전체 통합·성능 검증 | 대기 — 실행 가능한 사례 선행 | 전체 흐름의 실행 결과, 동일 조건의 비교 결과와 한계 | 없음 |
@@ -33,9 +33,9 @@
 
 ## 미결정 사항과 막힘
 
-- **바로 필요한 확인:** 2단계 범위의 단위 검증은 완료했다. 3단계 HTTP 키의 슬래시 제외는 [D-0004](../decisions/0004-http-key-no-slash.md)로 정했고 예시 API·원본 호출 횟수 관찰 방식도 확인했다. 나머지 요구사항 범위 및 URL 라우팅·오류·예시 API의 세부 설계는 아직이다.
-- **해당 단위에서 구체화:** 만료·무효화 정책, 동시성 대응, API 활용 사례와 성능 비교 조건.
-- **현재 확인 지점:** 2단계 저장·확장 실패 보존은 공식 TC와 별도 결함 주입으로 확인했다. 슬래시 외 키의 경로 표현, TTL 설정·제거, 무효화·동시성 구조·배포 형태는 아직 정하지 않았다.
+- **바로 필요한 확인:** 3단계 요구사항·설계의 사용자 결정과 독립 문서 검토를 마쳤다. 현재 계약 확정의 막힘은 없으며 다음 작업은 구현 전 TC다. HTTP 기본 응답은 D-0003, 키 슬래시 제외는 D-0004, 추가 입력·라우팅 계약은 [D-0005](../decisions/0005-http-api-boundary.md)를 따른다. 원본 API 활용 사례의 세부 계약은 [3단계 설계](../iterations/03-http-api/design.md#4-외부-사용-예제의-흐름과-실패)에 있다.
+- **해당 단위에서 구체화:** 만료·무효화 정책, 동시성 대응, 성능 비교 조건.
+- **현재 확인 지점:** 2단계 저장·확장 실패 보존은 공식 TC와 별도 결함 주입으로 확인했다. 3단계 키 경로 표현은 D-0005로 정했으나 실제 HTTP 구현·검증은 전이다. TTL 설정·제거, 무효화·동시성 구조·배포 형태는 아직 정하지 않았다.
 
 ## 갱신 방법
 
