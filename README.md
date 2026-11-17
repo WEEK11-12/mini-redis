@@ -8,13 +8,13 @@
 
 - **기준:** [과제 원문](docs/assignment.md)은 주어진 요구, [결정 기록](docs/decisions/README.md)은 단계 간 공유할 확정 선택, [컨벤션](docs/conventions.md)은 운영 규칙이다.
 - **계획과 현황:** [구현 단위 가이드](docs/plans/implementation-units.md)는 작업 순서 제안, [단계별 산출물 가이드](docs/plans/iteration-deliverables.md)는 각 파일의 작성 기준, [진행 현황](docs/plans/progress.md)은 실제 상태다. 계획은 완료 증거가 아니다.
-- **단계별 결과:** [요구사항 색인](docs/iterations/README.md)에서 명세를 찾고, [1단계 공유 계약](docs/iterations/01-scope-and-contract/overview.md), [2단계 저장소](docs/iterations/02-hash-table/overview.md), [3단계 HTTP 연결](docs/iterations/03-http-api/overview.md)의 `overview.md`에서 해당 설계·TC·구현·검증 기록으로 이동한다. 개념 학습 자료는 [Redis 학습 목차](docs/study/00-overview.md)에 분리돼 있다.
+- **단계별 결과:** [요구사항 색인](docs/iterations/README.md)에서 명세를 찾고, [1단계 공유 계약](docs/iterations/01-scope-and-contract/overview.md), [2단계 저장소](docs/iterations/02-hash-table/overview.md), [3단계 HTTP 연결](docs/iterations/03-http-api/overview.md), [4단계 만료·무효화](docs/iterations/04-expiration-invalidation/overview.md)의 `overview.md`에서 해당 단계 문서로 이동한다. 개념 학습 자료는 [Redis 학습 목차](docs/study/00-overview.md)에 분리돼 있다.
 
 링크에는 가능하면 **역할과 실제 파일명**을 함께 표시한다. 예: [검증 기록 (`verification.md`)](docs/iterations/02-hash-table/verification.md). 여기에는 테스트 실행 결과가 있고, [테스트 케이스 (`test-cases.md`)](docs/iterations/02-hash-table/test-cases.md)에는 구현 전 계획이 있다.
 
 ## 현재 출발점
 
-가벼운 범용 인메모리 캐시 서비스를 목표로 하며, 과제의 Optional 항목을 제외한 요구를 구현 범위에 포함합니다. 여러 애플리케이션 서버에서 공통으로 접근하는 사용 장면을 상정하고 [Python·HTTP API](docs/decisions/0002-python-http-interface.md)를 채택했습니다. [1단계 공유 계약](docs/iterations/01-scope-and-contract/overview.md)과 [2단계 저장소](docs/iterations/02-hash-table/overview.md), [3단계 HTTP 연결·응답 재사용](docs/iterations/03-http-api/overview.md)을 각 범위에서 완료했습니다. 최신 HTTP 32개·저장소 24개 공식 테스트가 통과하고 3단계 독립 검토 승인을 받았습니다. 실행 방법·검증 범위는 [구현 기록](docs/iterations/03-http-api/implementation.md)과 [검증 기록](docs/iterations/03-http-api/verification.md)에 있습니다. TTL·동시성 및 성능 비교는 아직 구현·검증하지 않았습니다.
+가벼운 범용 인메모리 캐시 서비스를 목표로 하며, 과제의 Optional 항목을 제외한 요구를 구현 범위에 포함합니다. 여러 애플리케이션 서버에서 공통으로 접근하는 사용 장면을 상정하고 [Python·HTTP API](docs/decisions/0002-python-http-interface.md)를 채택했습니다. [1단계 공유 계약](docs/iterations/01-scope-and-contract/overview.md)과 [2단계 저장소](docs/iterations/02-hash-table/overview.md), [3단계 HTTP 연결·응답 재사용](docs/iterations/03-http-api/overview.md)을 각 범위에서 완료했습니다. 최신 HTTP 32개·저장소 24개 공식 테스트가 통과하고 3단계 독립 검토 승인을 받았습니다. 실행 방법·검증 범위는 [구현 기록](docs/iterations/03-http-api/implementation.md)과 [검증 기록](docs/iterations/03-http-api/verification.md)에 있습니다. [4단계 만료·무효화 요구사항](docs/iterations/04-expiration-invalidation/requirements.md)은 확정했고 설계·구현·검증은 아직입니다. 동시성 및 성능 비교도 아직 구현·검증하지 않았습니다.
 
 저장소 루트에서 Python 3으로 다음 명령을 각각 실행해 현재 단계의 테스트를 확인할 수 있습니다. Mini Redis·원본 API·one-shot 클라이언트 실행 명령은 [3단계 구현 기록](docs/iterations/03-http-api/implementation.md#실행-방법)에 있습니다.
 
