@@ -1,7 +1,7 @@
 # 5단계 테스트 케이스 — HTTP 병렬 해석과 단일 명령 실행
 
 - 상태: 구현 전 TC 목록 — 문서 검토에서 두 지적 보완 후 제한 재검토 승인(이 상태 줄은 검토 이후 갱신); 테스트 코드·실행 결과·5단계 구현 승인은 아님
-- 근거: [요구사항](requirements.md), [설계](design.md), [D-0007](../../decisions/0007-single-thread-command-execution.md), [기존 HTTP·TTL 계약](../04-expiration-invalidation/test-cases.md), [산출물 가이드](../../plans/iteration-deliverables.md)
+- 근거: [요구사항](requirements.md), [설계](design.md), [D-0007](../../decisions/0007-single-thread-command-execution.md), [기존 HTTP·TTL 계약](../04-expiration-invalidation/test-cases.md), [산출물 가이드](../iteration-deliverables.md)
 - ID의 `I`는 실제 HTTP 서버와 공급 저장소를 연결한 통합 검증, `R`은 실행 TC 수에 넣지 않는 코드·문서 검토다. 요구사항 칸의 `001`~`005`는 각각 `REQ-05-001`~`REQ-05-005`를 뜻한다. 표의 기대 결과는 구현 전 계획이며 실제 결과는 구현 후 `verification.md`에 기록한다.
 - 공통 전제: 별도 언급이 없으면 새 서버/저장소, 서로 다른 HTTP 연결과 키를 사용한다. 요청은 배리어·이벤트로 단계별 해석/명령 제출/실행/응답을 멈춰 겹침을 증명한다. **소켓 연결·요청 시작 순서만으로 명령 순서를 추정하지 않는다.** 제어 접점은 구현 후 정하며 공개 API가 아니다. `HashTableStore`의 공급 단조 시계와 정리 스케줄의 시계는 별개로 제어하거나 실제 경과 시간을 명시한다. 명령 실행 순서를 계측할 때는 저장소 공개 연산 진입·반환 순서와 스레드 ID를 기록한다. HTTP 응답은 상태·JSON의 정확한 값/타입·필요한 헤더를 비교하고 최종 상태는 새 요청으로 확인한다.
 

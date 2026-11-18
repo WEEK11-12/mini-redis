@@ -1,7 +1,7 @@
 # 2단계 테스트 케이스 — 해시 테이블 저장소
 
 - 상태: 구현 전 작성한 계획 — 실제 실행·검토 결과는 [검증 기록 (`verification.md`)](verification.md)에 별도 기록
-- 근거: [요구사항](requirements.md), [설계](design.md), [단계별 산출물 가이드](../../plans/iteration-deliverables.md)
+- 근거: [요구사항](requirements.md), [설계](design.md), [단계별 산출물 가이드](../iteration-deliverables.md)
 - 유형: 아래 `U`는 HTTP 없이 실행하는 저장소 단위 테스트. 실행 결과는 [검증 기록 (`verification.md`)](verification.md)에 기록한다.
 
 | TC ID | 요구사항 | 전제·입력/절차 | 기대 결과 | 검증 방식 |

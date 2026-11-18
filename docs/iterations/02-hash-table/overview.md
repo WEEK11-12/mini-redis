@@ -2,7 +2,7 @@
 
 - 문서 상태: 요구사항 범위 확인, 설계 피드백 재확인 완료
 - 단계 상태: 완료 — 저장소 구현·전체 TC 실행·독립 검토 승인
-- 근거: [과제 원문](../../assignment.md), [1단계 범위·공유 계약](../01-scope-and-contract/overview.md), [2단계 요구사항 명세](requirements.md), [구현 단위 가이드](../../plans/implementation-units.md), [진행 현황](../../plans/progress.md)
+- 근거: [과제 원문](../../assignment.md), [1단계 범위·공유 계약](../01-scope-and-contract/overview.md), [2단계 요구사항 명세](requirements.md), [구현 단위 가이드](../implementation-units.md), [진행 현황](../README.md)
 
 ## 이 단계의 문서 길잡이
 
@@ -16,11 +16,11 @@
 | [구현 기록 (`implementation.md`)](implementation.md) | 실제 코드와 설계 대비 구현 선택. 테스트 판정은 적지 않는다. |
 | [검증 기록 (`verification.md`)](verification.md) | 테스트 명령·환경·실제 결과와 독립 검토의 범위. 테스트 케이스·구현 기록을 근거로 한다. |
 
-실제 저장소 코드는 `mini_redis/store.py`, 자동화 테스트 코드는 `tests/test_store.py`에 있다. 전체 단계의 현재 위치는 [진행 현황](../../plans/progress.md), 단계별 파일 형식의 공통 기준은 [산출물 가이드](../../plans/iteration-deliverables.md)를 참고한다.
+실제 저장소 코드는 `mini_redis/store.py`, 자동화 테스트 코드는 `tests/test_store.py`에 있다. 전체 단계의 현재 위치는 [진행 현황](../README.md), 단계별 파일 형식의 공통 기준은 [산출물 가이드](../iteration-deliverables.md)를 참고한다.
 
 ## 진행 체크리스트
 
-[공통 진행 순서](../../plans/implementation-units.md#진행-체크리스트)에 맞춰 **요구사항 명세 → 설계 → 설계 검토 → 구현 전 TC → 구현 → 테스트·결과 확인** 순서로 진행했다. 전체 TC 결과와 독립 검토의 승인 범위는 [검증 기록 (`verification.md`)](verification.md)에 구분해 남겼다.
+[공통 진행 순서](../implementation-units.md#진행-체크리스트)에 맞춰 **요구사항 명세 → 설계 → 설계 검토 → 구현 전 TC → 구현 → 테스트·결과 확인** 순서로 진행했다. 전체 TC 결과와 독립 검토의 승인 범위는 [검증 기록 (`verification.md`)](verification.md)에 구분해 남겼다.
 
 - [x] 요구사항의 범위·경계 사례·완료 조건을 확정한다. ([요구사항 명세 (`requirements.md`)](requirements.md); 인수 확인은 [검증 기록 (`verification.md`)](verification.md))
 - [x] 충돌 처리, 용량·확장, 입력 오류 표현과 연산의 입출력을 설계한다. ([설계 문서 (`design.md`)](design.md))
@@ -28,7 +28,7 @@
 - [x] 구현 전에 요구사항·설계 경계에 연결된 단위 TC를 [테스트 케이스 (`test-cases.md`)](test-cases.md)에 작성한다. (자동화 코드: `tests/test_store.py`)
 - [x] 해시 테이블과 기본 연산을 구현하고 [구현 기록 (`implementation.md`)](implementation.md)에 기록한다.
 - [x] 저장·조회·삭제·존재 확인과 충돌·경계 사례를 실행하고 명령·조건·결과를 [검증 기록 (`verification.md`)](verification.md)에 기록한다.
-- [x] 주요 연산 흐름과 남은 문제를 독립 검토하고 [진행 현황](../../plans/progress.md)을 갱신한다. (제품 수정 요구 없음)
+- [x] 주요 연산 흐름과 남은 문제를 독립 검토하고 [진행 현황](../README.md)을 갱신한다. (제품 수정 요구 없음)
 
 ## 목표와 범위
 

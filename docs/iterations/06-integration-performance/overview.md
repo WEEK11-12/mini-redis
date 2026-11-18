@@ -2,7 +2,7 @@
 
 - 문서 상태: [TC 목록 (`test-cases.md`)](test-cases.md)·[검증 기록 (`verification.md`)](verification.md) 작성 및 이번 단계의 결과 반영 완료
 - 단계 상태: 완료 — 기존 기능 재확인·E-001~007 전체 사용 흐름 7/7 통과, P-001/002 측정·제한 재검토 승인, R-001/002 코드·증거 점검. 설명 가능 여부는 본인 확인으로 마감했으며 독립 구술 검증으로 표현하지 않는다.
-- 근거: [과제 원문](../../assignment.md), [구현 단위 가이드](../../plans/implementation-units.md#6-최종-사용성능-검증과-설명), [1~5단계 진행 현황](../../plans/progress.md#작업-단위-현황)
+- 근거: [과제 원문](../../assignment.md), [구현 단위 가이드](../implementation-units.md#6-최종-사용성능-검증과-설명), [1~5단계 진행 현황](../README.md#단계별-진행-결과)
 
 ## 목표와 범위
 

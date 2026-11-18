@@ -2,7 +2,7 @@
 
 - 문서 상태: 요구사항 범위·설계 계약 확인 및 설계 검토 반영 완료
 - 단계 상태: 완료 — 최신 HTTP 32개·저장소 24개 통과, 독립 검토의 3단계 범위 승인
-- 근거: [과제 원문](../../assignment.md), [1단계 범위·공유 계약](../01-scope-and-contract/overview.md), [3단계 요구사항 명세](requirements.md), [D-0002 Python·HTTP API](../../decisions/0002-python-http-interface.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0004 HTTP 키 제약](../../decisions/0004-http-key-no-slash.md), [D-0005 3단계 HTTP 경계](../../decisions/0005-http-api-boundary.md), [2단계 저장소](../02-hash-table/overview.md), [구현 단위 가이드](../../plans/implementation-units.md)
+- 근거: [과제 원문](../../assignment.md), [1단계 범위·공유 계약](../01-scope-and-contract/overview.md), [3단계 요구사항 명세](requirements.md), [D-0002 Python·HTTP API](../../decisions/0002-python-http-interface.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0004 HTTP 키 제약](../../decisions/0004-http-key-no-slash.md), [D-0005 3단계 HTTP 경계](../../decisions/0005-http-api-boundary.md), [2단계 저장소](../02-hash-table/overview.md), [구현 단위 가이드](../implementation-units.md)
 
 ## 이 단계의 문서 길잡이
 
@@ -16,11 +16,11 @@
 | [구현 기록 (`implementation.md`)](implementation.md) | 실제 코드와 설계 대비 구현 선택·실행 방법. |
 | [검증 기록 (`verification.md`)](verification.md) | 구현자 실행 결과·독립 제한 승인과 미실행 범위. |
 
-전체 단계의 현재 위치는 [진행 현황](../../plans/progress.md), 단계별 파일 형식의 공통 기준은 [산출물 가이드](../../plans/iteration-deliverables.md)를 참고한다.
+전체 단계의 현재 위치는 [진행 현황](../README.md), 단계별 파일 형식의 공통 기준은 [산출물 가이드](../iteration-deliverables.md)를 참고한다.
 
 ## 진행 체크리스트
 
-[공통 진행 순서](../../plans/implementation-units.md#진행-체크리스트)에 맞춰 **요구사항 명세 → 설계 → 설계 검토 → 구현 전 TC → 구현 → 테스트·결과 확인** 순서로 관리한다. 설계 완료는 구현이나 인수 조건의 실행 검증을 뜻하지 않는다.
+[공통 진행 순서](../implementation-units.md#진행-체크리스트)에 맞춰 **요구사항 명세 → 설계 → 설계 검토 → 구현 전 TC → 구현 → 테스트·결과 확인** 순서로 관리한다. 설계 완료는 구현이나 인수 조건의 실행 검증을 뜻하지 않는다.
 
 - [x] [요구사항 명세 (`requirements.md`)](requirements.md)의 목표·범위와 관찰 가능한 완료 조건을 확인한다. (실행 인수 확인은 별도)
 - [x] 키의 URL 표현·입력 검증·오류 매핑·HTTP 실행 구조 및 API 응답 재사용 사례를 [설계 문서 (`design.md`)](design.md)에 확정한다. (공통 HTTP 경계는 [D-0005](../../decisions/0005-http-api-boundary.md), 단계별 예시는 설계 문서 4절)
@@ -28,7 +28,7 @@
 - [x] 구현 전에 실제 저장소를 사용하는 HTTP 통합 TC와 API 응답 재사용 경로를 요구사항 ID에 연결해 [테스트 케이스 (`test-cases.md`)](test-cases.md)에 기록한다. (목록 작성만 완료)
 - [x] HTTP 처리부·사용 사례를 구현하고 실제 변경을 [구현 기록 (`implementation.md`)](implementation.md)에 남긴다.
 - [x] 수정 요청 3건을 반영하고 영향 범위 9개·독립 probe 8개를 확인했다. 이후 최신 HTTP 32개와 저장소 24개를 독립 실행해 3단계 범위를 승인받았다 ([검증 기록 (`verification.md`)](verification.md)).
-- [x] 고정 포트 수동 시연은 미실시로 남기고 TTL·무효화(4단계), 동시성(5단계), 성능 비교(6단계)를 [진행 현황](../../plans/progress.md)에 분리했다.
+- [x] 고정 포트 수동 시연은 미실시로 남기고 TTL·무효화(4단계), 동시성(5단계), 성능 비교(6단계)를 [진행 현황](../README.md)에 분리했다.
 
 ## 목표와 범위
 

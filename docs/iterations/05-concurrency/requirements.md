@@ -2,7 +2,7 @@
 
 - 상태: 범위·인수 조건 확정 — 설계 전체 검토 및 구현 전 [TC 목록](test-cases.md) 작성, 구현·실행 검증 전
 - 적용 범위: 여러 클라이언트의 HTTP 요청을 통한 캐시 사용. 요청 접수·해석의 병렬 처리는 허용하되, 저장소 접근과 만료 정리는 한 명령 실행 스레드에서 순서대로 처리한다. 저장소 직접 병렬 호출, 전체 종단 간·성능 비교(6단계), Optional 영속성은 제외한다.
-- 근거: [과제 원문](../../assignment.md#중점-포인트), [1단계 공유 계약](../01-scope-and-contract/overview.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0005 기존 HTTP 계약](../../decisions/0005-http-api-boundary.md), [D-0006 TTL 입력·원자성 경계](../../decisions/0006-ttl-invalidation-contract.md), [D-0007 단일 스레드 명령 실행](../../decisions/0007-single-thread-command-execution.md), [2단계 저장소 요구사항](../02-hash-table/requirements.md), [3단계 HTTP 요구사항](../03-http-api/requirements.md), [4단계 만료·무효화 요구사항](../04-expiration-invalidation/requirements.md), [5단계 개요](overview.md), [구현 단위 가이드](../../plans/implementation-units.md#5-동시성-위험-점검과-필요한-방어)
+- 근거: [과제 원문](../../assignment.md#중점-포인트), [1단계 공유 계약](../01-scope-and-contract/overview.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0005 기존 HTTP 계약](../../decisions/0005-http-api-boundary.md), [D-0006 TTL 입력·원자성 경계](../../decisions/0006-ttl-invalidation-contract.md), [D-0007 단일 스레드 명령 실행](../../decisions/0007-single-thread-command-execution.md), [2단계 저장소 요구사항](../02-hash-table/requirements.md), [3단계 HTTP 요구사항](../03-http-api/requirements.md), [4단계 만료·무효화 요구사항](../04-expiration-invalidation/requirements.md), [5단계 개요](overview.md), [구현 단위 가이드](../implementation-units.md#5-동시성-위험-점검과-필요한-방어)
 
 ## 식별·상태
 
@@ -15,13 +15,13 @@
 
 - **명세:** HTTP 접수·해석과 캐시 명령 실행의 경계를 분리할 수 있지만, `set`·`get`·`exists`·`delete`·`set_ttl`·`clear_ttl`·`sweep_expired` 및 해시 테이블 확장을 포함한 **모든 저장소 접근은 한 명령 실행 스레드**에서만 수행한다. 조회·존재 확인에도 만료 제거가 수반될 수 있다. 요청 처리 스레드가 저장소를 직접 호출하거나 다른 스레드가 주기 정리를 실행하지 않는다. 요청 해석의 병렬 처리 여부와 구체적인 전달 구조는 설계에서 정한다.
 - **인수 조건:** 코드 경로와 실행 관찰로 요청 처리, 명령 실행, 정리의 스레드 경계를 확인한다. 다른 클라이언트의 요청이 겹쳐도 저장소 호출과 정리가 동일한 실행 스레드에서 순차적으로 수행되며, 요청 처리 스레드에서 직접 저장소에 진입하지 않는다. 같은 키의 갱신·삭제, 만료 판단 중 제거, TTL 설정·제거, 주기 정리, 삽입·재배치와 항목 수 갱신의 경계를 포함한다. 이 보장을 별도 직접 호출자나 다른 프로세스에 일반화하지 않는다.
-- **근거:** [D-0007 명령 실행 경계](../../decisions/0007-single-thread-command-execution.md), [구현 단위 가이드 5단계](../../plans/implementation-units.md#5-동시성-위험-점검과-필요한-방어), [4단계 설계의 순차 정리](../04-expiration-invalidation/design.md), [2단계 저장소 계약](../02-hash-table/design.md).
+- **근거:** [D-0007 명령 실행 경계](../../decisions/0007-single-thread-command-execution.md), [구현 단위 가이드 5단계](../implementation-units.md#5-동시성-위험-점검과-필요한-방어), [4단계 설계의 순차 정리](../04-expiration-invalidation/design.md), [2단계 저장소 계약](../02-hash-table/design.md).
 
 ### REQ-05-002 — 같은 키 요청의 일관된 결과
 
 - **명세:** 서로 다른 HTTP 클라이언트가 같은 키에 저장·조회·존재 확인·삭제 요청을 보내도, 각 완료 요청의 응답과 최종 상태는 단일 명령 실행 스레드의 처리 순서에 따른 결과와 일치해야 한다. 요청 접수·해석의 병렬화는 허용하지만 네트워크 도착 순서만으로 명령 실행 순서를 보장하지 않는다. 값이 `""`인 키와 미존재 키의 구별 및 기존 상태·본문 계약을 유지한다.
 - **인수 조건:** 시작 상태, 동시 클라이언트 수, 요청 시작·완료 및 제어한 순서를 명시한 HTTP 사례에서 모든 응답·최종 값/존재 상태가 하나의 유효한 처리 순서와 일치하고, 다른 키의 값·항목 수가 손상되지 않는다. 순서를 제어하지 않은 사례에서는 특정 승자를 가정하지 않고 허용되는 최종 상태 집합과 관찰 결과를 대조한다. 오류가 없었다는 사실만으로 통과로 판정하지 않는다.
-- **근거:** [REQ-03-001~004 HTTP 기본 연산](../03-http-api/requirements.md#req-03-001--저장덮어쓰기의-외부-호출), [REQ-02-001~004 저장소 기본 연산](../02-hash-table/requirements.md#req-02-001--저장과-덮어쓰기), [구현 단위 가이드 5단계](../../plans/implementation-units.md#5-동시성-위험-점검과-필요한-방어).
+- **근거:** [REQ-03-001~004 HTTP 기본 연산](../03-http-api/requirements.md#req-03-001--저장덮어쓰기의-외부-호출), [REQ-02-001~004 저장소 기본 연산](../02-hash-table/requirements.md#req-02-001--저장과-덮어쓰기), [구현 단위 가이드 5단계](../implementation-units.md#5-동시성-위험-점검과-필요한-방어).
 
 ### REQ-05-003 — 만료·TTL·무효화가 섞인 요청의 정합성
 
@@ -41,7 +41,7 @@
 
 - **명세:** HTTP 경로를 통한 단일 명령 실행 보장을 확인하고 **수용된 요청**의 기존 저장·조회·삭제, 키·입력 오류, TTL·만료·무효화 및 응답 계약을 유지한다. 단, 요청 처리 전 공통 한도 초과 또는 배출 중 새 접수 거부는 [5단계 설계의 좁은 가용성 예외](design.md#2-인터페이스와-데이터-흐름)로서 기존 경로·입력 오류 분류보다 먼저 `503 SERVER_BUSY`가 전송되거나 응답 불능 시 연결이 닫힐 수 있다. 생성·전송 가능한 최종 응답의 `Cache-Control: no-store`와 `HEAD` 본문 부재는 이 예외에서도 유지한다. 제어된 동시성 사례의 전제·동기화 조건·기대 최종 상태를 구현 전에 TC로 정의하며, 코드 검토와 실행 결과를 구분한다.
 - **인수 조건:** 실제 HTTP 통합 TC에 요청 수·동기화 방식·허용 순서 또는 기대 최종 상태를 명시하고 실제 실행 명령·환경·결과를 기록한다. 기존 2~4단계 회귀 결과와 단일 명령 실행·정리 주체를 확인한다. 실패·미실행은 그대로 기록하고, 서로 다른 요청이 해석 중 겹칠 수 있음을 확인하되 저장소 명령은 겹치지 않음을 확인한다. 수용된 요청의 기존 API 상태·본문·`Cache-Control: no-store` 및 만료 정리 회귀와, 수용 전 한도 초과·배출 중 거부의 저장소 미접근·가능한 `503`/응답 불능 연결 종료를 구분해 확인한다. 전송되는 `HEAD` 과부하 응답에는 본문이 없어야 한다.
-- **근거:** [과제 원문 품질 항목](../../assignment.md#품질), [REQ-03-006~008 HTTP 경계·검증](../03-http-api/requirements.md#req-03-006--http-응답의-캐시-방지), [REQ-04-005~006 TTL 연결·검증](../04-expiration-invalidation/requirements.md#req-04-005--기존-책임-경계와-계약-유지), [산출물 가이드](../../plans/iteration-deliverables.md#단계에-따른-테스트-경계).
+- **근거:** [과제 원문 품질 항목](../../assignment.md#품질), [REQ-03-006~008 HTTP 경계·검증](../03-http-api/requirements.md#req-03-006--http-응답의-캐시-방지), [REQ-04-005~006 TTL 연결·검증](../04-expiration-invalidation/requirements.md#req-04-005--기존-책임-경계와-계약-유지), [산출물 가이드](../iteration-deliverables.md#단계에-따른-테스트-경계).
 
 ## 확정된 범위와 설계에 남긴 선택
 

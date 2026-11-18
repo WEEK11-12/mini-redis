@@ -1,28 +1,105 @@
 # Mini Redis
 
-미니 Redis 제작 프로젝트입니다.
+직접 구현한 **해시 테이블**을 저장소로 삼아, 여러 클라이언트가 **HTTP API**로 저장·조회·존재 확인·삭제를 할 수 있는 가벼운 인메모리 키-값 캐시입니다. 만료 시간(TTL)과 명시적 삭제(무효화), 외부 API 응답 재사용 사례, 동시 요청 처리 구조, 캐시 사용 전후의 성능 비교까지 다룹니다.
 
-## 프로젝트 문서
+## 한눈에 보기
 
-처음 읽을 때는 **[전체 진행 현황](docs/plans/progress.md) → 해당 단계의 `overview.md` → 필요한 상세 문서** 순서가 간단하다. 2단계의 요구사항·설계·테스트 케이스·구현·검증 파일과 서로의 관계는 [2단계 문서 길잡이](docs/iterations/02-hash-table/overview.md#이-단계의-문서-길잡이)에 모았다. 단계마다 같은 이름의 문서를 같은 역할로 사용한다(코드가 없는 단계는 필요한 문서만 둔다).
+```text
+외부 클라이언트 ──HTTP──▶ 요청 접수·검증 ──▶ 명령 큐 ──▶ 명령 실행 스레드 1개 ──▶ HashTableStore
+ (examples/client.py)   (mini_redis/http_api.py)                                (mini_redis/store.py)
+                                                         └ 만료 항목 정리도 같은 스레드에서 수행
+```
 
-- **기준:** [과제 원문](docs/assignment.md)은 주어진 요구, [결정 기록](docs/decisions/README.md)은 단계 간 공유할 확정 선택, [컨벤션](docs/conventions.md)은 운영 규칙이다.
-- **계획과 현황:** [구현 단위 가이드](docs/plans/implementation-units.md)는 작업 순서 제안, [단계별 산출물 가이드](docs/plans/iteration-deliverables.md)는 각 파일의 작성 기준, [진행 현황](docs/plans/progress.md)은 실제 상태다. 계획은 완료 증거가 아니다.
-- **단계별 결과:** [요구사항 색인](docs/iterations/README.md)에서 명세를 찾고, [1단계 공유 계약](docs/iterations/01-scope-and-contract/overview.md), [2단계 저장소](docs/iterations/02-hash-table/overview.md), [3단계 HTTP 연결](docs/iterations/03-http-api/overview.md), [4단계 만료·무효화](docs/iterations/04-expiration-invalidation/overview.md), [5단계 동시성](docs/iterations/05-concurrency/overview.md), [6단계 전체 통합·성능 검증](docs/iterations/06-integration-performance/overview.md)의 `overview.md`에서 해당 단계 문서로 이동한다. 개념 학습 자료는 [Redis 학습 목차](docs/study/00-overview.md)에 분리돼 있다.
+- **저장소:** 해시값을 버킷 수로 나눈 나머지로 버킷을 고르고, 같은 버킷의 충돌 키는 전체 키를 비교해 구분합니다. 적재율이 1을 넘으면 버킷을 두 배로 늘려 재해싱합니다.
+- **만료·무효화:** TTL은 별도 요청으로 설정·갱신·제거하고, 일반 저장(PUT)은 이전 TTL을 해제하며, `DELETE`가 명시적 무효화입니다. 만료된 키는 없는 키처럼 응답합니다.
+- **동시성:** HTTP 요청의 접수·해석은 병렬로 하되, 저장소를 읽거나 바꾸는 모든 명령(만료 정리 포함)은 한 스레드가 차례로 처리해 경쟁 상태를 피합니다.
+- **활용 사례:** 별도 프로세스의 원본 API 응답을 캐시 미스일 때만 가져와 저장하고, 다음 호출부터는 캐시에서 재사용합니다.
 
-링크에는 가능하면 **역할과 실제 파일명**을 함께 표시한다. 예: [검증 기록 (`verification.md`)](docs/iterations/02-hash-table/verification.md). 여기에는 테스트 실행 결과가 있고, [테스트 케이스 (`test-cases.md`)](docs/iterations/02-hash-table/test-cases.md)에는 구현 전 계획이 있다.
+## AI와 함께 만든 과정
 
-## 현재 출발점
+이 프로젝트는 **개발자가 범위와 선택을 판단하고, 에이전트가 역할별로 초안·설계·구현·검증을 지원하는 반복 루프**로 진행했습니다. 설계를 먼저 모두 끝내지 않고, **단계마다 요구사항→설계→설계 검증→구현 전 TC→구현→구현 검증의 한 사이클을 돌려** 앞 단계의 결과를 다음 단계에 반영했습니다. 설계와 구현은 작성한 에이전트가 아니라 별도의 검증 에이전트가 검토했고, 수정 요청이 나오면 해당 단계로 돌아갔습니다. 단계 간 계약이 바뀌면 새 결정으로 기록했습니다(3단계의 순차 서버 → 5단계의 단일 명령 스레드, [D-0007](docs/decisions/0007-single-thread-command-execution.md)).
 
-가벼운 범용 인메모리 캐시 서비스를 목표로 하며, 여러 애플리케이션 서버가 공통으로 접근하는 [Python·HTTP API](docs/decisions/0002-python-http-interface.md)를 채택했습니다. **1~6단계는 각각 정한 범위에서 완료**했습니다. [6단계 검증 기록](docs/iterations/06-integration-performance/verification.md)에는 기존 검증 증거 재사용, 원본 API를 포함한 전체 사용 흐름 E-001~007 통과, 캐시 미사용·미스·히트 성능 비교와 한계를 기록했습니다. 이 로컬 고정 응답 환경에서는 캐시 히트가 미사용보다 느렸으며 다른 원본 작업으로 일반화하지 않습니다. 핵심 로직 설명 가능 여부는 본인 확인으로 마감했으며 독립 구술 검증과 구분합니다. 5단계 동시성 테스트의 임시 계측과 무보정 원본 runner, 고정 포트 수동 시연·Optional 영속성은 [진행 현황](docs/plans/progress.md)의 범위·한계를 따릅니다.
+```text
+1단계: 범위·공유 계약만 정함
+  └─ 2~5단계, 단계마다:  요구사항 → 설계 → 설계 검증 → 구현 전 TC → 구현 → 구현 검증 → 범위 승인
+                                      ▲ 수정 요청 ┘                    ▲ 수정 요청 ┘
+  └─ 6단계: 새 요구사항 없이 전체 사용 흐름·성능 검증, 개발자의 결과 확인·설명
+```
 
-저장소 루트에서 Python 3으로 다음 기존 저장소·HTTP 테스트를 각각 실행할 수 있습니다. 6단계의 전체 사용 흐름·성능 비교 결과와 실행 조건은 [6단계 검증 기록](docs/iterations/06-integration-performance/verification.md)을 참고하세요. Mini Redis·원본 API·one-shot 클라이언트 실행 명령은 [3단계 구현 기록](docs/iterations/03-http-api/implementation.md#실행-방법)에 있습니다.
+- 3~5단계에서는 독립 검증이 캐시 리다이렉트 허용, 만료 제거 중 항목 수 불일치, 완료 통지 실패 시 영구 대기 같은 결함을 실제로 찾았고, 수정과 회귀 테스트·재검토를 거쳐 승인했습니다. ([검증 루프가 잡아낸 것](docs/iterations/README.md#검증-루프가-실제로-잡아낸-것))
+- 에이전트의 완료 보고만으로 승인하지 않고 소스 해시와 실행 결과를 대조했으며, 승인 범위를 검토한 범위로 한정했습니다. ([검증 방식](docs/iterations/README.md#검증을-믿을-수-있게-한-방식))
+- 사람이 정한 측정 조건과 직접 설명한 핵심 로직은 [사람의 개입 지점](docs/iterations/README.md#사람의-개입이-결과를-바꾼-지점)에 구분해 적었습니다.
+- 반복 방식, 역할·모델 표, 단계별 사례: [AI와 함께 진행한 반복 루프](docs/iterations/README.md#ai와-함께-진행한-반복-루프) · 진행 원칙: [D-0001](docs/decisions/0001-project-workflow.md)
+
+## 폴더 구조와 의미
+
+```text
+mini-redis/
+├── README.md                  이 문서: 프로젝트 입구
+├── mini_redis/                제품 코드
+│   ├── store.py                 해시 테이블 저장소 (직접 구현, 만료 기한·정리 포함)
+│   └── http_api.py              HTTP API, 입력 검증, 명령 큐와 단일 실행 스레드
+├── examples/                  활용 사례와 측정 도구
+│   ├── origin_api.py            응답을 고정으로 돌려주는 가상의 원본 API
+│   ├── client.py                캐시 조회 → 미스일 때만 원본 호출·저장하는 클라이언트
+│   └── benchmark.py             캐시 미사용·미스·히트 지연시간 측정
+├── tests/                     자동화 테스트 (저장소·HTTP·만료·동시성)
+└── docs/                      사람이 읽는 모든 문서
+    ├── assignment.md            과제 원문 (기준)
+    ├── requirements.md          요구사항 통합 안내: 단계별 요구사항을 한 곳에서 요약
+    ├── design.md                설계 통합 안내: 구조와 주요 선택을 한 곳에서 요약
+    ├── implementation.md        구현 통합 안내: 코드 경로·역할·실행 방법 요약
+    ├── decisions/               주요 결정 기록 D-0001~0007 (선택 이유·영향·재검토 조건)
+    ├── iterations/              1~6단계 작업 기록 (아래 설명)
+    ├── conventions.md           문서·결정·코드 운영 규칙
+    └── study/                   Redis 개념 학습 자료
+```
+
+`docs/iterations/`는 작업을 6개 단계로 나눠 진행한 기록입니다. 각 단계 폴더에는 보통 `overview.md`(입구·체크리스트), `requirements.md`(요구사항과 인수 조건), `design.md`(설계), `test-cases.md`(구현 전 테스트 계획), `implementation.md`(구현 기록), `verification.md`(실제 실행 결과)가 있습니다. 상위의 `README.md`는 단계별 진행 결과, `implementation-units.md`는 착수 당시의 작업 순서 제안, `iteration-deliverables.md`는 파일별 작성 기준입니다. 1단계는 코드 없는 계약 단계, 6단계는 기존 요구를 검증하는 단계라 일부 파일이 없습니다.
+
+| 단계 | 내용 |
+| --- | --- |
+| 1 | [범위·공유 계약](docs/iterations/01-scope-and-contract/overview.md) |
+| 2 | [해시 테이블 저장소](docs/iterations/02-hash-table/overview.md) |
+| 3 | [HTTP API·응답 재사용](docs/iterations/03-http-api/overview.md) |
+| 4 | [만료·무효화](docs/iterations/04-expiration-invalidation/overview.md) |
+| 5 | [동시성](docs/iterations/05-concurrency/overview.md) |
+| 6 | [전체 사용·성능 검증](docs/iterations/06-integration-performance/overview.md) |
+
+에이전트 전용 `AGENTS.md`와 `.agent/`는 Git에서 제외된 로컬 파일입니다.
+
+## 주제별로 읽기
+
+| 궁금한 주제 | 먼저 볼 문서 | 근거 상세 |
+| --- | --- | --- |
+| 무엇을 왜 만들었나 | [과제 원문](docs/assignment.md), [D-0002 Python·HTTP 선택 이유](docs/decisions/0002-python-http-interface.md), [요구사항 통합 안내](docs/requirements.md) | [1단계 범위·계약](docs/iterations/01-scope-and-contract/overview.md) |
+| 해시 테이블 구현과 설명 (핵심 로직) | [설계 통합 안내](docs/design.md) | [2단계 설계](docs/iterations/02-hash-table/design.md), [2단계 구현](docs/iterations/02-hash-table/implementation.md), 코드 `mini_redis/store.py` |
+| 외부에서 쓰는 방법과 API 응답 재사용 | [3단계 설계 4절](docs/iterations/03-http-api/design.md#4-외부-사용-예제의-흐름과-실패), [D-0003 기본 HTTP 계약](docs/decisions/0003-http-response-contract.md) | [3단계 실행 방법](docs/iterations/03-http-api/implementation.md#실행-방법) |
+| 만료와 무효화를 어떻게 처리했나 | [D-0006 TTL·무효화 계약](docs/decisions/0006-ttl-invalidation-contract.md) | [4단계 설계](docs/iterations/04-expiration-invalidation/design.md), [4단계 검증](docs/iterations/04-expiration-invalidation/verification.md) |
+| 동시성 문제를 어떻게 다뤘나 | [D-0007 단일 명령 실행 스레드](docs/decisions/0007-single-thread-command-execution.md) | [5단계 설계](docs/iterations/05-concurrency/design.md), [5단계 검증](docs/iterations/05-concurrency/verification.md) |
+| 캐시를 쓰면 빨라졌나 (성능 비교) | [6단계 개요의 측정 조건](docs/iterations/06-integration-performance/overview.md#확정된-성능-비교-조건) | [6단계 성능 결과·해석](docs/iterations/06-integration-performance/verification.md#3-성능-비교-실행) |
+| AI와 어떻게 진행·검증했나 | [AI와 함께 진행한 반복 루프](docs/iterations/README.md#ai와-함께-진행한-반복-루프), [D-0001 진행 방식](docs/decisions/0001-project-workflow.md) | [검증 루프가 잡아낸 것](docs/iterations/README.md#검증-루프가-실제로-잡아낸-것), [산출물 가이드](docs/iterations/iteration-deliverables.md) |
+
+**성능 비교 결과 읽는 법:** 이 로컬 환경에서 캐시 히트(중앙값 약 0.38ms)가 캐시 미사용(약 0.23ms)보다 느렸습니다. 원본이 같은 호스트에서 고정 응답을 즉시 돌려줘 원본 비용이 거의 없고, 히트도 HTTP 왕복에 요청 해석·명령 스레드 경유가 더해지기 때문으로 *추정*합니다(구간별 시간은 측정하지 않음). 원본에 실제 지연이 있는 경우는 측정하지 않았으므로 캐시가 빠르다고도 느리다고도 일반화하지 않습니다. ([측정 방법·한계](docs/iterations/06-integration-performance/verification.md#3-성능-비교-실행))
+
+## 실행과 확인
+
+저장소 루트에서 Python 3으로 실행합니다.
 
 ```sh
-python3 -m unittest discover -s tests -p 'test_http_api.py' -q
 python3 -m unittest discover -s tests -p 'test_store.py' -q
+python3 -m unittest discover -s tests -p 'test_http_api.py' -q
 python3 -m unittest discover -s tests -p 'test_expiration_store.py' -q
 python3 -m unittest discover -s tests -p 'test_expiration_http.py' -q
 ```
 
-문서는 작성자가 아니라 독자와 목적을 기준으로 구분합니다. 사람이 참고하는 문서는 `docs/`에서 Git으로 관리하고, 에이전트 전용 진입 안내(`AGENTS.md`)와 작업 맥락(`.agent/`)은 Git에서 제외합니다. 로컬 안내가 없는 환경에서는 컨벤션 문서의 협업 규칙을 기준으로 다시 생성합니다.
+Mini Redis·원본 API·클라이언트 실행 명령은 [3단계 구현 기록](docs/iterations/03-http-api/implementation.md#실행-방법), 성능 측정 명령은 [6단계 검증](docs/iterations/06-integration-performance/verification.md#3-성능-비교-실행)에 있습니다. `tests/test_concurrency_http.py`의 동시성 테스트는 임시 시험 접점을 계측해 실행했으며, 위 명령처럼 보정 없이 실행한 통과 결과로 보지 않습니다. 실제 실행 결과는 [5단계 검증](docs/iterations/05-concurrency/verification.md)에 있습니다.
+
+## 완료 범위와 한계
+
+1~6단계는 각각 합의한 범위에서 완료했습니다. 6단계는 외부 사용 흐름 7개 시나리오(E-001~007)를 모두 통과했고 성능 비교는 조건별 100회씩 성공했습니다. 다음은 완료 범위 밖이거나 구분해서 읽어야 합니다.
+
+- 핵심 로직을 설명할 수 있는지는 본인 확인이며 독립 구술 검증이 아닙니다.
+- 성능 결과는 한 대의 로컬 호스트, 고정 응답, 순차 단일 클라이언트 기준입니다.
+- 서버 중단 시 데이터 보존(영속성, 과제의 Optional 항목), 고정 포트 수동 시연, 배포는 포함하지 않았습니다.
+- 여러 스레드가 저장소 객체를 직접 호출하는 경우의 안전성은 보장하지 않습니다. HTTP 경로를 통한 사용만 범위입니다.

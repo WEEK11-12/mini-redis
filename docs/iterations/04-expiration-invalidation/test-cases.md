@@ -1,7 +1,7 @@
 # 4단계 테스트 케이스 — 만료와 명시적 무효화
 
 - 상태: 구현 전 TC 목록; 테스트 코드·실행 결과 아님
-- 근거: [요구사항](requirements.md), [설계](design.md), [D-0006](../../decisions/0006-ttl-invalidation-contract.md), [3단계 HTTP 경계](../03-http-api/design.md#2-기본-http-인터페이스와-입력-계약), [산출물 가이드](../../plans/iteration-deliverables.md)
+- 근거: [요구사항](requirements.md), [설계](design.md), [D-0006](../../decisions/0006-ttl-invalidation-contract.md), [3단계 HTTP 경계](../03-http-api/design.md#2-기본-http-인터페이스와-입력-계약), [산출물 가이드](../iteration-deliverables.md)
 - 유형: `U`는 `HashTableStore` 단위, `I`는 실제 저장소를 연결한 HTTP/서버 통합. 요구사항 칸의 축약 번호도 `REQ-04-`를 뜻한다(예: `REQ-04-001, 002` → `REQ-04-001`, `REQ-04-002`). 각 행의 번호는 향후 테스트 구현과 검증 기록에서 유지한다. 아직 함수명·보조 훅·실행 명령은 확정하지 않는다. 특별한 언급이 없으면 새 저장소/서버에서 시작하며, 시간 테스트에는 저장소에 공급하는 정수 나노초 단조 시간원을 제어한다. 기준 시각 `t`, TTL `n`초의 기한은 `t + n × 10⁹` ns다. 서버 루프 주기 관찰은 저장소 시간원과 별개일 수 있으므로 실제 주기/제어 가능한 서버 시간 조건을 명시해 검증한다.
 
 ## 저장소 단위 케이스

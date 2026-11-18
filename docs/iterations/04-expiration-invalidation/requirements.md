@@ -2,13 +2,13 @@
 
 - 상태: 4단계 범위·인수 조건 확정 — 구현·실행 및 제한 독립 재검토 결과는 [검증 기록](verification.md) 참조
 - 적용 범위: 기존 해시 테이블 저장소와 HTTP 사용 경로에서 보관 기간 만료 및 명시적 무효화의 동작을 제공·검증한다. 동시성 방어(5단계), 전체 종단 간·성능 비교(6단계), Optional 영속성은 이번 인수 범위가 아니다.
-- 근거: [과제 원문](../../assignment.md), [1단계 공유 계약](../01-scope-and-contract/overview.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0005 HTTP 경계](../../decisions/0005-http-api-boundary.md), [D-0006 TTL·무효화 계약](../../decisions/0006-ttl-invalidation-contract.md), [2단계 저장소 요구사항](../02-hash-table/requirements.md), [3단계 HTTP 요구사항](../03-http-api/requirements.md), [4단계 개요](overview.md), [구현 단위 가이드](../../plans/implementation-units.md)
+- 근거: [과제 원문](../../assignment.md), [1단계 공유 계약](../01-scope-and-contract/overview.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0005 HTTP 경계](../../decisions/0005-http-api-boundary.md), [D-0006 TTL·무효화 계약](../../decisions/0006-ttl-invalidation-contract.md), [2단계 저장소 요구사항](../02-hash-table/requirements.md), [3단계 HTTP 요구사항](../03-http-api/requirements.md), [4단계 개요](overview.md), [구현 단위 가이드](../implementation-units.md)
 
 ## 식별·상태
 
 - ID는 `REQ-04-001`처럼 단계 번호와 일련번호로 고정한다. **명세**는 기대 동작, **인수 조건**은 나중에 실행으로 확인할 기준이다. 범위 확정은 구현·테스트 통과의 증거가 아니다.
 - [D-0006](../../decisions/0006-ttl-invalidation-contract.md)에 따라 기존 `PUT` 본문은 문자열 `value` 필드 하나만 허용한다. TTL은 별도 연산으로 설정·갱신·제거한다. 구체적인 경로·메서드·응답과 만료 시각 계산·물리적 정리는 설계에서 정한다.
-- 구현 전 TC 목록은 설계 검토 후 [테스트 케이스](test-cases.md)에 기록했다. 실제 변경과 실행 결과는 각각 [구현 기록](implementation.md)·[검증 기록](verification.md)에 남겼다. [단계별 산출물 가이드](../../plans/iteration-deliverables.md)를 따른다.
+- 구현 전 TC 목록은 설계 검토 후 [테스트 케이스](test-cases.md)에 기록했다. 실제 변경과 실행 결과는 각각 [구현 기록](implementation.md)·[검증 기록](verification.md)에 남겼다. [단계별 산출물 가이드](../iteration-deliverables.md)를 따른다.
 
 ## 기능 요구사항
 
@@ -16,7 +16,7 @@
 
 - **명세:** 외부에서 기존 `PUT`과 별개의 연산으로 키의 보관 기간을 설정한다. TTL은 양의 정수 초만 허용하며 `0`·음수·분수는 잘못된 입력으로 거부하고 기존 상태를 유지한다. 유효한 키·문자열 값(빈 문자열 포함)과 기존 `PUT`의 `value` 한 필드 계약은 그대로다. 별도 TTL 연산의 경로·메서드·본문과 실패 응답은 설계에서 정한다.
 - **인수 조건:** 저장된 키에 별도 연산으로 TTL을 지정하면 유효 기간 안에는 값(빈 문자열 포함)이 조회되고 지정한 기간이 지난 뒤에는 `REQ-04-002`의 미존재 결과가 된다. 양의 정수 초가 아닌 TTL 입력은 거부되며 기존 값·만료 상태가 바뀌지 않는다. 기존 `PUT /keys/{key}`는 TTL 필드를 허용하지 않고, TTL 없는 저장은 만료되지 않는다. 저장과 TTL 설정은 두 HTTP 요청 사이의 원자성을 보장하지 않는다.
-- **근거:** [과제 원문 만료 항목](../../assignment.md#중점-포인트), [구현 단위 가이드 4단계](../../plans/implementation-units.md#4-만료와-명시적-무효화), [D-0005 PUT 본문 제약](../../decisions/0005-http-api-boundary.md#결정과-이유), [D-0006 TTL 입력 계약](../../decisions/0006-ttl-invalidation-contract.md#결정과-이유).
+- **근거:** [과제 원문 만료 항목](../../assignment.md#중점-포인트), [구현 단위 가이드 4단계](../implementation-units.md#4-만료와-명시적-무효화), [D-0005 PUT 본문 제약](../../decisions/0005-http-api-boundary.md#결정과-이유), [D-0006 TTL 입력 계약](../../decisions/0006-ttl-invalidation-contract.md#결정과-이유).
 
 ### REQ-04-002 — 만료 키의 조회·존재 확인·삭제
 
@@ -48,7 +48,7 @@
 
 - **명세:** 확정된 만료·무효화 동작의 경계와 상태 변경은 저장소 단위 테스트 및 실제 저장소를 이용하는 HTTP 통합 테스트로 확인하고 기존 2·3단계 회귀를 유지한다.
 - **인수 조건:** 만료 직전·직후, 원래 없는 키, 빈 값, 무효화 후 재조회, 같은 키의 변경·재저장에 대응하는 TC를 작성하고 실행 명령·조건·실제 결과를 기록한다. 시간 의존 검증은 가능하면 제어 가능한 시간원을 사용한다. 미실행 항목은 통과로 적지 않는다.
-- **근거:** [과제 원문 품질 항목](../../assignment.md#품질), [구현 단위 가이드 4단계](../../plans/implementation-units.md#4-만료와-명시적-무효화), [산출물 가이드의 테스트 경계](../../plans/iteration-deliverables.md#단계에-따른-테스트-경계).
+- **근거:** [과제 원문 품질 항목](../../assignment.md#품질), [구현 단위 가이드 4단계](../implementation-units.md#4-만료와-명시적-무효화), [산출물 가이드의 테스트 경계](../iteration-deliverables.md#단계에-따른-테스트-경계).
 
 ## 확정된 범위와 설계에 남긴 선택
 

@@ -2,7 +2,7 @@
 
 - 문서 상태: 요구사항·설계·TC 목록 확정, 구현자 자체 점검 기록
 - 단계 상태: 완료 — 최초 수정 요청 해소·제한 독립 재검토 통과 ([검증 기록](verification.md))
-- 근거: [과제 원문](../../assignment.md), [1단계 범위·공유 계약](../01-scope-and-contract/overview.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0005 HTTP 경계](../../decisions/0005-http-api-boundary.md), [D-0006 TTL·무효화 계약](../../decisions/0006-ttl-invalidation-contract.md), [2단계 저장소](../02-hash-table/overview.md), [3단계 HTTP 연결](../03-http-api/overview.md), [구현 단위 가이드](../../plans/implementation-units.md)
+- 근거: [과제 원문](../../assignment.md), [1단계 범위·공유 계약](../01-scope-and-contract/overview.md), [D-0003 기본 HTTP 계약](../../decisions/0003-http-response-contract.md), [D-0005 HTTP 경계](../../decisions/0005-http-api-boundary.md), [D-0006 TTL·무효화 계약](../../decisions/0006-ttl-invalidation-contract.md), [2단계 저장소](../02-hash-table/overview.md), [3단계 HTTP 연결](../03-http-api/overview.md), [구현 단위 가이드](../implementation-units.md)
 
 ## 이 단계의 문서 길잡이
 
@@ -16,11 +16,11 @@
 | [구현 기록 (`implementation.md`)](implementation.md) | 실제 코드 변경과 설계 대비 구현 선택·실행 방법. |
 | [검증 기록 (`verification.md`)](verification.md) | 자체 실행, 최초 수정 요청 및 제한 독립 재검토 판정과 남은 범위. |
 
-전체 단계의 현재 위치는 [진행 현황](../../plans/progress.md), 단계별 파일 형식의 공통 기준은 [산출물 가이드](../../plans/iteration-deliverables.md)를 참고한다.
+전체 단계의 현재 위치는 [진행 현황](../README.md), 단계별 파일 형식의 공통 기준은 [산출물 가이드](../iteration-deliverables.md)를 참고한다.
 
 ## 진행 체크리스트
 
-[공통 진행 순서](../../plans/implementation-units.md#진행-체크리스트)에 맞춰 **요구사항 명세 → 설계 → 설계 검토 → 구현 전 TC → 구현 → 테스트·결과 확인** 순서로 관리한다. 아래 항목은 아직 완료 증거가 아니며, 해당 문서를 작성·검토하거나 실행한 뒤에만 체크한다.
+[공통 진행 순서](../implementation-units.md#진행-체크리스트)에 맞춰 **요구사항 명세 → 설계 → 설계 검토 → 구현 전 TC → 구현 → 테스트·결과 확인** 순서로 관리한다. 아래 항목은 아직 완료 증거가 아니며, 해당 문서를 작성·검토하거나 실행한 뒤에만 체크한다.
 
 - [x] [요구사항 명세 (`requirements.md`)](requirements.md)의 TTL·무효화 입력 계약과 인수 조건을 확인해 범위를 확정한다. (실행 인수 확인은 별도)
 - [x] 채택한 무효화 계약을 바탕으로 TTL 설정·갱신·제거의 HTTP 경로·응답, 만료 판단·정리 시점과 저장소·HTTP 경계를 [설계 문서](design.md)에 정한다. 기존 `PUT` 본문과 공유 HTTP 응답 계약은 유지한다.
@@ -28,7 +28,7 @@
 - [x] 구현 전에 만료 직전·직후, 없는 키, 무효화 후 재조회, 기존 값과 덮어쓰기의 경계를 요구사항 ID와 연결해 [테스트 케이스 (`test-cases.md`)](test-cases.md)에 기록한다. (목록 작성과 테스트 통과는 별개)
 - [x] 확정된 계약에 맞춰 저장소·HTTP 연결부를 구현하고 실제 변경을 [구현 기록 (`implementation.md`)](implementation.md)에 남긴다.
 - [x] 제어 가능한 시간 조건의 단위·HTTP 통합 테스트와 기존 회귀 및 독립 판정은 [검증 기록 (`verification.md`)](verification.md)에 구분해 남겼다.
-- [x] 후속 동시성·성능 검증 등 남은 범위를 [검증 기록](verification.md)에 남기고 [진행 현황](../../plans/progress.md)을 갱신한다.
+- [x] 후속 동시성·성능 검증 등 남은 범위를 [검증 기록](verification.md)에 남기고 [진행 현황](../README.md)을 갱신한다.
 
 ## 목표와 범위
 

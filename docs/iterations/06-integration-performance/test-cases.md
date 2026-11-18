@@ -1,7 +1,7 @@
 # 6단계 테스트 케이스 — 전체 사용 흐름과 성능 비교
 
 - 상태: 실행 전 정의한 TC 목록 — 두 지적(E-002, E-004/005) 보완 후 문서 제한 재검토 승인. 이후 E 실행 결과는 [검증 기록](verification.md#2-전체-사용-흐름-검증)에 분리했다. P 측정 결과는 [검증 기록 3절](verification.md#3-성능-비교-실행)에 분리했다(제한 재검토 승인). 6단계 전체 완료 승인은 아직 없으며 표의 기대값은 실행 결과가 아니다.
-- 근거: [과제 원문](../../assignment.md#품질), [6단계 개요](overview.md), [기존 요구사항 색인](../README.md), [3단계 원본 API 계약](../03-http-api/design.md#4-외부-사용-예제의-흐름과-실패), [4단계 TTL 계약](../04-expiration-invalidation/design.md#2-외부-인터페이스와-확정된-계약), [5단계 동시성 계약](../05-concurrency/requirements.md), [산출물 가이드](../../plans/iteration-deliverables.md)
+- 근거: [과제 원문](../../assignment.md#품질), [6단계 개요](overview.md), [기존 요구사항 색인](../README.md), [3단계 원본 API 계약](../03-http-api/design.md#4-외부-사용-예제의-흐름과-실패), [4단계 TTL 계약](../04-expiration-invalidation/design.md#2-외부-인터페이스와-확정된-계약), [5단계 동시성 계약](../05-concurrency/requirements.md), [산출물 가이드](../iteration-deliverables.md)
 - 새 기능·새 `REQ-06`은 없다. 아래 `03-007`은 `REQ-03-007`을 뜻하며, 다른 축약 ID도 `REQ-<단계>-<번호>`로 확장한다. `E`는 실제 별도 서버 프로세스와 외부 HTTP/one-shot 클라이언트의 종단 간 사례, `P`는 그 환경에서의 성능 측정·판정 사례, `R`은 실행 TC 수에서 제외하는 기록·코드 검토다. 표의 기대값은 **계획**이고 실제 결과는 [검증 기록 (`verification.md`)](verification.md)에 분리해 쓴다.
 - 공통 전제: 별도 명시가 없으면 Mini Redis와 원본 API를 서로 다른 장기 실행 프로세스로 띄우고, 깨끗한 시작은 **두 프로세스 재시작**으로 만든다. 예제는 `python3 -m examples.client --cache-url … --origin-url …`을 호출할 때마다 새 프로세스다. 원본 `GET /origin-calls`는 횟수를 늘리지 않는다. 원본 데이터는 `GET /items/demo` → `200 {"value":"sample-response"}`, 키는 `example-demo`다. 캐시의 HTTP 결과는 상태·JSON 값/타입·`Cache-Control: no-store`를 확인한다. 카운트·키 상태 확인은 관찰만 하며 추가 원본 데이터 요청을 섞지 않는다. 재시작 없이 다음 사례를 이어서 초기 상태라고 가정하지 않는다.
 
