@@ -1,6 +1,6 @@
 # Mini Redis 진행 현황
 
-- 문서 상태: 현황 기록 중 — 5단계 HTTP 동시성 범위 검증 완료·승인, 6단계 조건 확인 대기
+- 문서 상태: 현황 기록 중 — 1~6단계 각각의 범위 완료; 6단계 설명 가능 여부는 본인 확인으로 마감
 - 확인일: 2026-11-18 (KST)
 - 목적: 전체 진행 흐름, 현재 작업, 막힌 결정과 검증 근거를 함께 확인한다. 일정표나 완료 예상표가 아니다.
 - 기준: [과제 원문](../assignment.md), [구현 단위 가이드](implementation-units.md), [사용자 주도 진행 원칙](../decisions/0001-project-workflow.md)
@@ -9,7 +9,7 @@
 
 - **완료로 확인된 것:** Redis 이론 학습, 공유 구현 단위 가이드 작성. 학습과 가이드 작성은 구현·테스트 완료가 아니다.
 - **현재 작업 단위:** 1~3단계와 4단계 만료·무효화는 각각의 범위에서 완료했다. 5단계도 최초 결함 3건 해소 뒤 [최종 검증](../iterations/05-concurrency/verification.md#최종-검증--5단계-범위-승인)에서 계측 적용 TC 25/25·수정 후 HTTP 회귀 47/47·보완 검증 10/10을 확인해 이번 HTTP 동시성 범위를 승인했다. 원본 테스트의 임시 접점은 저장소에 반영하지 않았으므로 보정 없는 원본 runner 자체가 Green이라는 뜻은 아니다.
-- **다음 확인 지점:** 6단계 전체 시나리오와 캐시 미사용/미스/히트 성능 비교의 조건 확정. 다음 단계 구현·성능 측정은 자동 착수하지 않는다. 고정 포트 수동 시연은 미실시다.
+- **6단계 판정:** 기존 기능 재확인·E-001~007 전체 사용 흐름 통과, P-001/002 성능 비교 제한 재검토 승인, R-001/002 코드·증거 대조 완료. 설명 가능하다는 본인 확인을 받아 [이번 단계 범위 완료](../iterations/06-integration-performance/verification.md#5-종합-판정과-남은-확인)로 기록했다. 독립 구술 검증이나 다른 환경의 성능 보증은 아니다. 고정 포트 수동 시연은 미실시다.
 - **구현·테스트 근거:** [2단계 검증](../iterations/02-hash-table/verification.md), [3단계 검증](../iterations/03-http-api/verification.md), [4단계 검증](../iterations/04-expiration-invalidation/verification.md)은 각 범위의 실행·독립 판정을 구분해 기록한다.
 
 ## 전체 흐름
@@ -26,14 +26,14 @@
 | 2. 해시 테이블 저장소 | 완료 — 공식 단위 TC 24개 통과·독립 검토 승인 | 3단계 연결 시 저장소 회귀 확인 | [단계 문서 길잡이](../iterations/02-hash-table/overview.md#이-단계의-문서-길잡이), [구현 기록 (`implementation.md`)](../iterations/02-hash-table/implementation.md), [검증 기록 (`verification.md`)](../iterations/02-hash-table/verification.md); HTTP·TTL·동시성은 미포함 |
 | 3. 외부 사용·API 응답 재사용 | 완료 — 최신 HTTP 32개·저장소 24개 통과, 독립 범위 승인 | 4단계 만료·무효화에서 기존 계약 연결 | [3단계 구현 기록](../iterations/03-http-api/implementation.md), [검증 기록](../iterations/03-http-api/verification.md); 고정 포트 수동 시연 미실시 |
 | 4. 만료·무효화 | 완료 — 최초 결함 수정 뒤 제한 독립 재검토 통과 | 5단계 동시성 검토에서 새 상태 변경 경로 확인 | [단계 개요](../iterations/04-expiration-invalidation/overview.md), [구현](../iterations/04-expiration-invalidation/implementation.md), [검증](../iterations/04-expiration-invalidation/verification.md); 상태 문서는 검토 snapshot 이후 갱신 |
-| 5. 동시성 점검·방어 | 완료 — 이번 HTTP 범위 승인 | 6단계 시나리오·비교 조건 확정, 필요 시 시험 계측의 저장소 반영 | [단계 개요](../iterations/05-concurrency/overview.md), [검증 기록](../iterations/05-concurrency/verification.md); 계측 적용 TC 25/25·HTTP 회귀 47/47·보완 10/10, 원본 runner 무보정 Green과 구분 |
-| 6. 전체 통합·성능 검증 | 대기 — 실행 가능한 사례 선행 | 전체 흐름의 실행 결과, 동일 조건의 비교 결과와 한계 | 없음 |
+| 5. 동시성 점검·방어 | 완료 — 이번 HTTP 범위 승인 | 6단계 연결·성능 확인 완료; 원본 시험 계측 반영은 별도 유지보수 | [단계 개요](../iterations/05-concurrency/overview.md), [검증 기록](../iterations/05-concurrency/verification.md); 계측 적용 TC 25/25·HTTP 회귀 47/47·보완 10/10, 원본 runner 무보정 Green과 구분 |
+| 6. 전체 통합·성능 검증 | 완료 — E-001~007 7/7, P-001/002 제한 재검토 승인, R-001/002 근거 점검, 설명 가능 여부 본인 확인 | 이번 범위 종료; 남은 범위·한계는 검증 기록 참조 | [6단계 개요](../iterations/06-integration-performance/overview.md), [TC 정의](../iterations/06-integration-performance/test-cases.md), [검증 기록](../iterations/06-integration-performance/verification.md); 제품·원본 테스트 변경 없음 |
 
 이 표의 ‘다음 확인할 결과’는 **완료 조건의 제안**이지 이미 얻은 결과가 아니다. 단위 2~5의 진행 중에도 새 연결부가 생기면 간단한 통합 확인을 하고, 실제 명령·조건·결과를 해당 단위의 기록에 남긴다. 영속성은 [과제 원문](../assignment.md)의 선택 항목으로, 현재 구현 범위에 넣지 않았다. 제외 확정도 아니다.
 
 ## 미결정 사항과 막힘
 
-- **바로 필요한 확인:** 6단계 전체 시나리오와 성능 비교 조건. 5단계의 남은 실행 검증 공백은 최종 검증에서 보완했다.
+- **바로 필요한 확인:** 이번 6단계 범위에서 없음. 후속 사용·발표에서 추가 질문이 나오면 해당 코드·검증 기록과 대조한다.
 - **별도 유지보수:** 검토용 계측은 로컬 산출물에 보존했으며 원본 테스트의 임시 접점 정식 연결은 별도 작업이다. 전달 채널·타임아웃 값은 [구현 기록](../iterations/05-concurrency/implementation.md) 참조.
 - **현재 확인 지점:** 4단계 TTL·무효화와 5단계 HTTP 동시성은 각 범위 승인. 60초 반복 시험을 운영 시간 전체의 보증이나 6단계 성능 비교로 확대하지 않는다. 배포 형태는 후속 확인 대상이다.
 

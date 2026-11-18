@@ -8,15 +8,15 @@
 
 - **기준:** [과제 원문](docs/assignment.md)은 주어진 요구, [결정 기록](docs/decisions/README.md)은 단계 간 공유할 확정 선택, [컨벤션](docs/conventions.md)은 운영 규칙이다.
 - **계획과 현황:** [구현 단위 가이드](docs/plans/implementation-units.md)는 작업 순서 제안, [단계별 산출물 가이드](docs/plans/iteration-deliverables.md)는 각 파일의 작성 기준, [진행 현황](docs/plans/progress.md)은 실제 상태다. 계획은 완료 증거가 아니다.
-- **단계별 결과:** [요구사항 색인](docs/iterations/README.md)에서 명세를 찾고, [1단계 공유 계약](docs/iterations/01-scope-and-contract/overview.md), [2단계 저장소](docs/iterations/02-hash-table/overview.md), [3단계 HTTP 연결](docs/iterations/03-http-api/overview.md), [4단계 만료·무효화](docs/iterations/04-expiration-invalidation/overview.md), [5단계 동시성](docs/iterations/05-concurrency/overview.md)의 `overview.md`에서 해당 단계 문서로 이동한다. 개념 학습 자료는 [Redis 학습 목차](docs/study/00-overview.md)에 분리돼 있다.
+- **단계별 결과:** [요구사항 색인](docs/iterations/README.md)에서 명세를 찾고, [1단계 공유 계약](docs/iterations/01-scope-and-contract/overview.md), [2단계 저장소](docs/iterations/02-hash-table/overview.md), [3단계 HTTP 연결](docs/iterations/03-http-api/overview.md), [4단계 만료·무효화](docs/iterations/04-expiration-invalidation/overview.md), [5단계 동시성](docs/iterations/05-concurrency/overview.md), [6단계 전체 통합·성능 검증](docs/iterations/06-integration-performance/overview.md)의 `overview.md`에서 해당 단계 문서로 이동한다. 개념 학습 자료는 [Redis 학습 목차](docs/study/00-overview.md)에 분리돼 있다.
 
 링크에는 가능하면 **역할과 실제 파일명**을 함께 표시한다. 예: [검증 기록 (`verification.md`)](docs/iterations/02-hash-table/verification.md). 여기에는 테스트 실행 결과가 있고, [테스트 케이스 (`test-cases.md`)](docs/iterations/02-hash-table/test-cases.md)에는 구현 전 계획이 있다.
 
 ## 현재 출발점
 
-가벼운 범용 인메모리 캐시 서비스를 목표로 하며, 과제의 Optional 항목을 제외한 요구를 구현 범위에 포함합니다. 여러 애플리케이션 서버에서 공통으로 접근하는 사용 장면을 상정하고 [Python·HTTP API](docs/decisions/0002-python-http-interface.md)를 채택했습니다. 1~3단계의 각 범위와 [4단계 만료·무효화](docs/iterations/04-expiration-invalidation/overview.md)의 구현·제한 독립 검토를 완료했습니다. 단계별 테스트 실행 시점, 첫 검토의 수정 요청과 재검토 판정은 [4단계 검증 기록](docs/iterations/04-expiration-invalidation/verification.md)에 있습니다. [5단계 동시성](docs/iterations/05-concurrency/overview.md)은 최초 결함 3건 해소 뒤 계측 적용 TC 25/25·수정 후 HTTP 회귀 47/47·보완 검증 10/10을 확인해 이번 HTTP 동시성 범위를 승인했습니다. 원본 테스트의 임시 접점은 저장소에 반영하지 않았으므로 무보정 원본 runner의 Green과는 구분합니다. [검증 기록](docs/iterations/05-concurrency/verification.md)은 구현 전 RED·실패/재실행·최종 결과와 적용 한계를 구분합니다. 전체 성능 비교는 후속 단계입니다. 4단계 저장소·테스트 소스는 그 독립 검토 snapshot 이후 변경하지 않았습니다.
+가벼운 범용 인메모리 캐시 서비스를 목표로 하며, 여러 애플리케이션 서버가 공통으로 접근하는 [Python·HTTP API](docs/decisions/0002-python-http-interface.md)를 채택했습니다. **1~6단계는 각각 정한 범위에서 완료**했습니다. [6단계 검증 기록](docs/iterations/06-integration-performance/verification.md)에는 기존 검증 증거 재사용, 원본 API를 포함한 전체 사용 흐름 E-001~007 통과, 캐시 미사용·미스·히트 성능 비교와 한계를 기록했습니다. 이 로컬 고정 응답 환경에서는 캐시 히트가 미사용보다 느렸으며 다른 원본 작업으로 일반화하지 않습니다. 핵심 로직 설명 가능 여부는 본인 확인으로 마감했으며 독립 구술 검증과 구분합니다. 5단계 동시성 테스트의 임시 계측과 무보정 원본 runner, 고정 포트 수동 시연·Optional 영속성은 [진행 현황](docs/plans/progress.md)의 범위·한계를 따릅니다.
 
-저장소 루트에서 Python 3으로 다음 명령을 각각 실행해 현재 단계의 테스트를 확인할 수 있습니다. Mini Redis·원본 API·one-shot 클라이언트 실행 명령은 [3단계 구현 기록](docs/iterations/03-http-api/implementation.md#실행-방법)에 있습니다.
+저장소 루트에서 Python 3으로 다음 기존 저장소·HTTP 테스트를 각각 실행할 수 있습니다. 6단계의 전체 사용 흐름·성능 비교 결과와 실행 조건은 [6단계 검증 기록](docs/iterations/06-integration-performance/verification.md)을 참고하세요. Mini Redis·원본 API·one-shot 클라이언트 실행 명령은 [3단계 구현 기록](docs/iterations/03-http-api/implementation.md#실행-방법)에 있습니다.
 
 ```sh
 python3 -m unittest discover -s tests -p 'test_http_api.py' -q
