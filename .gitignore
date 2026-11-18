@@ -4,3 +4,5 @@ AGENTS.md
 /.agent/
 __pycache__/
 *.pyc
+# per-checkout live benchmark raw results and logs (iteration 07)
+/var/

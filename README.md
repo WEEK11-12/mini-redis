@@ -136,12 +136,12 @@ mini-redis/
     ├── requirements.md          요구사항 통합 안내: 단계별 요구사항을 한 곳에서 요약
     ├── design.md                설계 통합 안내: 구조와 주요 선택을 한 곳에서 요약
     ├── implementation.md        구현 통합 안내: 코드 경로·역할·실행 방법 요약
-    ├── decisions/               주요 결정 기록 D-0001~0007 (선택 이유·영향·재검토 조건)
-    ├── iterations/              1~6단계 작업 기록 (아래 설명)
+    ├── decisions/               주요 결정 기록 D-0001~0008 (선택 이유·영향·재검토 조건)
+    ├── iterations/              1~6단계 완료 기록과 7단계 후속 작업 (아래 설명)
     └── study/                   Redis 개념 학습 자료
 ```
 
-`docs/iterations/`는 작업을 6개 단계로 나눠 진행한 기록입니다. 각 단계 폴더에 요구사항·설계·테스트 계획·구현·검증 기록이 있고, 상위 `README.md`가 단계별 진행 결과를 정리합니다.
+`docs/iterations/`는 1~6단계의 완료 기록과 7단계 후속 웹 시연의 계약·설계를 구분합니다. 단계별 산출물과 실제 진행 상태는 상위 [이터레이션 안내](docs/iterations/README.md)와 각 개요에서 확인합니다.
 
 | 단계 | 내용 |
 | --- | --- |
@@ -151,6 +151,7 @@ mini-redis/
 | 4 | [만료·무효화](docs/iterations/04-expiration-invalidation/overview.md) |
 | 5 | [동시성](docs/iterations/05-concurrency/overview.md) |
 | 6 | [전체 사용·성능 검증](docs/iterations/06-integration-performance/overview.md) |
+| 7 (후속·구현 전) | [실시간 성능 비교 웹 뷰](docs/iterations/07-live-benchmark-ui/overview.md) — [실행·화면 계약 채택](docs/decisions/0008-live-benchmark-contract.md) |
 
 ## 주제별로 읽기
 
