@@ -1,7 +1,7 @@
 """Compare sequential latency without cache, on cache miss and on cache hit.
 
-Starts Mini Redis and the origin API as separate long-running processes, then
-times only the value acquisition. State preparation and origin-call checks run
+Seeds the origin SQLite file, starts Mini Redis and the origin API as separate
+long-running processes, then times only the value acquisition. State preparation and origin-call checks run
 outside the timer. Writes every round's raw record and the summary as JSON.
 """
 
@@ -21,6 +21,7 @@ from pathlib import Path
 from urllib.error import URLError
 
 from examples.client import fetch, reuse
+from examples.seed_db import seed
 
 ROOT = Path(__file__).resolve().parent.parent
 KEY_URL = "/keys/example-demo"
@@ -30,7 +31,7 @@ ORIGIN_DELTA = {"no_cache": 1, "miss": 1, "hit": 0}
 WARMUP = 5
 ROUNDS = 100
 SOURCES = ("mini_redis/http_api.py", "mini_redis/store.py", "examples/client.py",
-           "examples/origin_api.py", "examples/benchmark.py")
+           "examples/origin_api.py", "examples/seed_db.py", "examples/benchmark.py")
 
 
 def free_port():
@@ -39,8 +40,8 @@ def free_port():
         return sock.getsockname()[1]
 
 
-def start(module, port, log):
-    process = subprocess.Popen([sys.executable, "-B", "-m", module, "--port", str(port)],
+def start(module, port, log, *extra):
+    process = subprocess.Popen([sys.executable, "-B", "-m", module, "--port", str(port), *extra],
                                cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
     deadline = time.monotonic() + 10
     while time.monotonic() < deadline:
@@ -160,12 +161,17 @@ def main():
         "cache_url": cache, "origin_url": origin, "warmup_per_condition": WARMUP,
         "rounds": ROUNDS, "timer": "time.perf_counter_ns around value acquisition only",
         "percentile": "median of sorted successes; p90 nearest-rank",
+        # shortcut: examples.client.reuse() fixes key example-demo -> /items/demo, so every
+        # condition reads the same row; per-round keys need a client key parameter.
+        "origin_db": seed(output.with_suffix(".db")),
+        "origin_key": "items.id=demo (cache key example-demo), same for all conditions",
     }
     warmup, records, servers = [], [], []
     result["aborted"] = None
     with open(output.with_suffix(".servers.log"), "w") as log:
         try:
-            servers.append(start("examples.origin_api", origin_port, log))
+            servers.append(start("examples.origin_api", origin_port, log,
+                                 "--db", result["origin_db"]["path"]))
             servers.append(start("mini_redis.http_api", cache_port, log))
             for index in range(WARMUP + ROUNDS):
                 order = CONDITIONS[index % 3:] + CONDITIONS[:index % 3]
