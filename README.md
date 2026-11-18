@@ -77,8 +77,7 @@ flowchart LR
     O --> S[Mini Redis에 저장 후 응답]
 ```
 
-<details>
-<summary>캐시 예제 실행 명령</summary>
+### 캐시 예제 실행
 
 프로젝트 루트에서 PowerShell 창 3개를 열고 각각 실행합니다. 빠른 시작에서 띄운 Mini Redis가 실행 중이면 창 1은 그대로 사용하세요.
 
@@ -92,8 +91,6 @@ flowchart LR
 # 창 3: 예제 웹 서버 (8081)
 .\.venv\Scripts\python.exe -m examples.cache_demo web
 ```
-
-</details>
 
 브라우저에서 **http://127.0.0.1:8081**을 엽니다. 다음 순서로 확인할 수 있습니다.
 
@@ -172,6 +169,8 @@ python -m venv .venv
 ```powershell
 .\.venv\Scripts\python.exe -m mini_redis.server
 ```
+
+**상품 캐시 시연 페이지까지 열려면 원본 API와 예제 웹 서버도 실행해야 합니다.** 위의 [캐시 예제 실행](#캐시-예제-실행)에 있는 세 명령을 각각 별도 터미널에서 실행하고 `http://127.0.0.1:8081`을 여세요.
 
 기본 주소는 `http://127.0.0.1:8080`입니다. 실행한 창을 열어 둔 채 **두 번째 PowerShell 창**에서 아래 요청을 보냅니다.
 
