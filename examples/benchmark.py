@@ -1,8 +1,10 @@
 """Compare sequential latency without cache, on cache miss and on cache hit.
 
-Seeds the origin SQLite file, starts Mini Redis and the origin API as separate
-long-running processes, then times only the value acquisition. State preparation and origin-call checks run
-outside the timer. Writes every round's raw record and the summary as JSON.
+Reads a MongoDB collection seeded by examples.seed_mongo (needs pymongo), starts
+Mini Redis and the origin API as separate long-running processes, and gives every
+measured call its own item drawn with a fixed random seed. Only the value
+acquisition is timed; state preparation and origin-call checks run outside the
+timer. Writes every round's raw record and the summary as JSON.
 """
 
 import argparse
@@ -10,6 +12,7 @@ import hashlib
 import json
 import math
 import platform
+import random
 import signal
 import socket
 import statistics
@@ -21,17 +24,16 @@ from pathlib import Path
 from urllib.error import URLError
 
 from examples.client import fetch, reuse
-from examples.seed_db import seed
+from examples.seed_mongo import COLLECTION, DATABASE, collection, item_id, value_for
 
 ROOT = Path(__file__).resolve().parent.parent
-KEY_URL = "/keys/example-demo"
-EXPECTED = "sample-response"
+KEY_SEED = 20261118
 CONDITIONS = ("no_cache", "miss", "hit")
 ORIGIN_DELTA = {"no_cache": 1, "miss": 1, "hit": 0}
 WARMUP = 5
 ROUNDS = 100
 SOURCES = ("mini_redis/http_api.py", "mini_redis/store.py", "examples/client.py",
-           "examples/origin_api.py", "examples/seed_db.py", "examples/benchmark.py")
+           "examples/origin_api.py", "examples/seed_mongo.py", "examples/benchmark.py")
 
 
 def free_port():
@@ -73,48 +75,50 @@ def origin_calls(origin):
     return body["count"]
 
 
-def prepare(condition, cache):
+def prepare(condition, cache, cache_key, expected):
     if condition == "miss":
-        status, body = fetch(cache + KEY_URL, method="DELETE")
+        status, body = fetch(f"{cache}/keys/{cache_key}", method="DELETE")
         if status != 200 or not isinstance(body, dict) or type(body.get("deleted")) is not bool:
             raise ValueError(f"miss preparation failed: {status} {body}")
     elif condition == "hit":
-        status, body = fetch(cache + KEY_URL, method="PUT",
-                             body=json.dumps({"value": EXPECTED}).encode("utf-8"))
+        status, body = fetch(f"{cache}/keys/{cache_key}", method="PUT",
+                             body=json.dumps({"value": expected}).encode("utf-8"))
         if status != 200 or body != {"stored": True}:
             raise ValueError(f"hit preparation failed: {status} {body}")
 
 
-def acquire(condition, cache, origin):
+def acquire(condition, cache, origin, cache_key, item_path):
     if condition == "no_cache":
-        status, body = fetch(origin + "/items/demo")
+        status, body = fetch(origin + item_path)
         if status != 200 or not isinstance(body, dict) or not isinstance(body.get("value"), str):
             raise ValueError(f"origin request failed: {status}")
         return body["value"]
-    return reuse(cache, origin)
+    return reuse(cache, origin, cache_key, item_path)
 
 
-def run_once(condition, cache, origin):
-    record = {"condition": condition, "stage": "prepare", "elapsed_ns": None, "value": None,
+def run_once(condition, cache, origin, number):
+    cache_key, item_path, expected = f"bench-{number}", f"/items/{item_id(number)}", value_for(number)
+    record = {"condition": condition, "item": item_id(number), "cache_key": cache_key,
+              "stage": "prepare", "elapsed_ns": None, "value_ok": None,
               "origin_before": None, "origin_after": None, "success": False, "error": None}
     try:
-        prepare(condition, cache)
+        prepare(condition, cache, cache_key, expected)
         record["stage"] = "origin_before"
         record["origin_before"] = origin_calls(origin)
         record["stage"] = "acquire"
         start_ns = time.perf_counter_ns()
         try:
-            value = acquire(condition, cache, origin)
+            value = acquire(condition, cache, origin, cache_key, item_path)
         finally:
             # failed acquisitions keep the time until the error was raised
             record["elapsed_ns"] = time.perf_counter_ns() - start_ns
-        record["value"] = value
+        record["value_ok"] = value == expected
         record["stage"] = "origin_after"
         record["origin_after"] = origin_calls(origin)
         record["stage"] = "verify"
         delta = record["origin_after"] - record["origin_before"]
-        if value != EXPECTED:
-            raise ValueError(f"unexpected value {value!r}")
+        if not record["value_ok"]:
+            raise ValueError(f"unexpected value {value[:32]!r} for {item_path}")
         if delta != ORIGIN_DELTA[condition]:
             raise ValueError(f"origin delta {delta}, expected {ORIGIN_DELTA[condition]}")
         record["success"] = True
@@ -143,9 +147,25 @@ def summarize(records):
     return summary
 
 
+def mongo_state(uri):
+    """Collection size and WiredTiger cache counters, read outside any timer."""
+    client, _ = collection(uri)
+    try:
+        stats = client[DATABASE].command("collStats", COLLECTION)
+        cache = client.admin.command("serverStatus")["wiredTiger"]["cache"]
+        return {"count": stats["count"], "data_bytes": stats["size"],
+                "storage_bytes": stats["storageSize"], "index_bytes": stats["totalIndexSize"],
+                "cache_max_bytes": cache["maximum bytes configured"],
+                "cache_used_bytes": cache["bytes currently in the cache"],
+                "pages_read_into_cache": cache["pages read into cache"]}
+    finally:
+        client.close()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Measure no-cache, miss and hit latency")
     parser.add_argument("--output", required=True, help="raw result JSON path")
+    parser.add_argument("--mongo-uri", required=True, help="MongoDB seeded by examples.seed_mongo")
     args = parser.parse_args()
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -161,22 +181,24 @@ def main():
         "cache_url": cache, "origin_url": origin, "warmup_per_condition": WARMUP,
         "rounds": ROUNDS, "timer": "time.perf_counter_ns around value acquisition only",
         "percentile": "median of sorted successes; p90 nearest-rank",
-        # shortcut: examples.client.reuse() fixes key example-demo -> /items/demo, so every
-        # condition reads the same row; per-round keys need a client key parameter.
-        "origin_db": seed(output.with_suffix(".db")),
-        "origin_key": "items.id=demo (cache key example-demo), same for all conditions",
+        "mongo_before": mongo_state(args.mongo_uri), "key_seed": KEY_SEED,
     }
+    docs = result["mongo_before"]["count"] - 1  # item-0 .. item-(docs-1) plus the demo document
+    # Every call reads a distinct item; conditions share one uniform draw over the whole collection.
+    numbers = random.Random(KEY_SEED).sample(range(docs), (WARMUP + ROUNDS) * len(CONDITIONS))
+    result["key_space"] = docs
     warmup, records, servers = [], [], []
     result["aborted"] = None
     with open(output.with_suffix(".servers.log"), "w") as log:
         try:
             servers.append(start("examples.origin_api", origin_port, log,
-                                 "--db", result["origin_db"]["path"]))
+                                 "--mongo-uri", args.mongo_uri))
             servers.append(start("mini_redis.http_api", cache_port, log))
             for index in range(WARMUP + ROUNDS):
                 order = CONDITIONS[index % 3:] + CONDITIONS[:index % 3]
                 for position, condition in enumerate(order):
-                    record = run_once(condition, cache, origin)
+                    number = numbers[index * len(CONDITIONS) + CONDITIONS.index(condition)]
+                    record = run_once(condition, cache, origin, number)
                     record.update(round=index - WARMUP if index >= WARMUP else None,
                                   position=position)
                     (warmup if index < WARMUP else records).append(record)
@@ -190,6 +212,10 @@ def main():
                     result["servers"].append(stop(process))
                 except Exception as exc:
                     result["servers"].append({"pid": process.pid, "error": f"{type(exc).__name__}: {exc}"})
+    try:
+        result["mongo_after"] = mongo_state(args.mongo_uri)
+    except Exception as exc:
+        result["mongo_after"] = {"error": f"{type(exc).__name__}: {exc}"}
     summary = summarize(records)
     summary["complete"] = summary["complete"] and result["aborted"] is None
     result.update(warmup=warmup, records=records, summary=summary)

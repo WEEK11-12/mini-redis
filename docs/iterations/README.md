@@ -70,7 +70,7 @@ flowchart TD
 
 ### 사람의 개입이 결과를 바꾼 지점
 
-- **측정 조건:** 성능 비교에서 원본 응답에 인위적 지연을 넣지 않고 동시 부하는 제외하기로 정했다. 비교 목적이 "클라이언트가 캐시를 쓰는 이유(메모리 캐시의 장점)"이기 때문이다. 이후 고정 응답 원본으로는 서버 DB 조회 대 메모리 캐시 읽기라는 과제 의도의 비교가 되지 않아, 원본을 SQLite 파일 DB 조회로 바꿔 재측정했다(독립 검증 대기). [6단계 조건](06-integration-performance/overview.md#확정된-성능-비교-조건)
+- **측정 조건:** 성능 비교에서 원본 응답에 인위적 지연을 넣지 않고 동시 부하는 제외하기로 정했다. 비교 목적이 "클라이언트가 캐시를 쓰는 이유(메모리 캐시의 장점)"이기 때문이다. 과제 의도(서버 DB 조회 대 메모리 캐시 읽기)에 맞춰 원본을 Docker MongoDB(데이터가 WiredTiger 캐시보다 큼)로 두고 호출마다 다른 키를 읽게 했다(독립 검증 승인). [6단계 조건](06-integration-performance/overview.md#확정된-성능-비교-조건)
 - **중복 검증 방지:** 최종 검증 단계에서 이미 통과한 단계별 검증을 전부 반복하지 않고 새 연결부와 영향 경로의 회귀만 고르기로 정했다. 진행 조율 단계에서 이미 끝난 검증을 다시 위임하려던 제안은 현황·기록과 대조해 바로잡았다. 6단계도 새 요구사항을 만들지 않고 기존 요구를 검증하는 단계로 정리했다. [기존 증거 재사용](06-integration-performance/verification.md#11-기존-검증-증거-재사용)
 - **설명 확인:** 해시 버킷 선택, 충돌 구분, 덮어쓰기와 TTL 해제, 만료 키 처리, 단일 스레드 이유, 재해싱 조건을 개발자가 직접 설명했다. 최종 설명 가능 여부는 본인 확인으로 기록했고 독립 구술 검증과 구분한다. [결과 정리·설명](06-integration-performance/verification.md#4-결과-정리설명)
 
@@ -91,7 +91,7 @@ flowchart TD
 | [3. 외부 HTTP·응답 재사용](03-http-api/overview.md) — 2단계 저장소 | 외부 호출·원본 API 예제 연결. 최신 HTTP 32개·저장소 24개 통과, 독립 범위 승인. | [요구사항 `REQ-03-001`~`008`](03-http-api/requirements.md), [검증](03-http-api/verification.md). 고정 포트 수동 시연 미실시 |
 | [4. 만료·명시적 무효화](04-expiration-invalidation/overview.md) — 2·3단계 | TTL·삭제 무효화 연결, 최초 결함 수정 뒤 제한 독립 재검토 통과. | [요구사항 `REQ-04-001`~`006`](04-expiration-invalidation/requirements.md), [검증](04-expiration-invalidation/verification.md) |
 | [5. 동시성 점검·방어](05-concurrency/overview.md) — 2~4단계 | 결함 3건 해소 후 HTTP 범위 승인. 계측 적용 동시성 25/25·수정 후 HTTP 회귀 47/47·보완 10/10 통과. | [요구사항 `REQ-05-001`~`005`](05-concurrency/requirements.md), [검증](05-concurrency/verification.md). 원본 테스트 임시 접점은 저장소에 미반영; 무보정 원본 runner Green과 구분 |
-| [6. 전체 사용·성능 검증](06-integration-performance/overview.md) — 앞선 기능 | 새 REQ ID 없이 기존 기능 증거 재사용과 외부 흐름 E-001~007 7/7, P-001/002 고정 응답 조건 비교·제한 재검토 승인, R-001/002 코드·증거 점검. 설명 가능 여부 본인 확인으로 완료. 이후 파일 DB 조회 원본 조건으로 재측정, 독립 검증 대기. | [TC](06-integration-performance/test-cases.md), [검증](06-integration-performance/verification.md). 독립 구술 검증 아님; 고정 응답·파일 DB 조회 로컬 비교 모두 히트가 미사용보다 느렸으며 다른 환경에 일반화하지 않음 |
+| [6. 전체 사용·성능 검증](06-integration-performance/overview.md) — 앞선 기능 | 새 REQ ID 없이 기존 기능 증거 재사용과 외부 흐름 E-001~007 7/7, R-001/002 코드·증거 점검. 설명 가능 여부 본인 확인으로 완료. 성능 비교는 MongoDB·키 분산 원본 조건으로 측정해 독립 검증 승인(수정 요청 반영). | [TC](06-integration-performance/test-cases.md), [검증](06-integration-performance/verification.md). 독립 구술 검증 아님; MongoDB·키 분산 조건에서 히트가 미사용보다 빨랐으며(독립 검증 승인) 다른 환경에 일반화하지 않음 |
 
 각 행의 통과는 **그 단계의 검증 범위**에 대한 것이다. 서로 다른 단계의 계측 조건·테스트 수를 하나의 전체 통과율로 더하지 않는다. 새 모듈 연결 때 통합 확인을 하고 마지막 단계에서 실제 원본 API를 포함한 흐름을 점검했다. 6단계는 기존 독립 테스트를 전부 다시 실행하지 않고 제품 해시 및 영향 경로를 확인해 증거를 재사용했다. 자세한 실행 명령과 한계는 각 `verification.md`에 있다.
 

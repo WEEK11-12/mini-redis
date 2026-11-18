@@ -1,0 +1,3 @@
+# Optional: only the MongoDB origin backend, seed_mongo.py and benchmark.py need this.
+# Install into an isolated venv; mini_redis/ itself uses the standard library only.
+pymongo==4.20.0

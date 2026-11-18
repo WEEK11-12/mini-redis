@@ -26,19 +26,20 @@ def fetch(url, *, method="GET", body=None):
             return response.code, json.load(response) if response.code == 404 else None
 
 
-def reuse(cache_url, origin_url):
-    status, result = fetch(cache_url.rstrip("/") + "/keys/example-demo")
+def reuse(cache_url, origin_url, cache_key="example-demo", item_path="/items/demo"):
+    # Defaults keep the example contract; the benchmark passes other keys to spread reads.
+    key_url = cache_url.rstrip("/") + "/keys/" + cache_key
+    status, result = fetch(key_url)
     if status == 200 and isinstance(result, dict) and isinstance(result.get("value"), str):
         return result["value"]
     if status != 404 or result != {"error": {"code": "KEY_NOT_FOUND"}}:
         raise ValueError("cache lookup failed")
 
-    status, result = fetch(origin_url.rstrip("/") + "/items/demo")
+    status, result = fetch(origin_url.rstrip("/") + item_path)
     if status != 200 or not isinstance(result, dict) or not isinstance(result.get("value"), str):
         raise ValueError("origin request failed")
     value = result["value"]
-    status, result = fetch(cache_url.rstrip("/") + "/keys/example-demo", method="PUT",
-                           body=json.dumps({"value": value}).encode("utf-8"))
+    status, result = fetch(key_url, method="PUT", body=json.dumps({"value": value}).encode("utf-8"))
     if status != 200 or not isinstance(result, dict) or set(result) != {"stored"} or result["stored"] is not True:
         raise ValueError("cache write failed")
     return value
