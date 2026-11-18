@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="live-bench-token" content="__TOKEN__">
+<title>Mini Redis 실시간 성능 비교 (로컬)</title>
+<style nonce="__NONCE__">
+  :root { color-scheme: light dark; --line: #8884; --warn: #b45309; --bad: #b91c1c; --ok: #15803d; }
+  body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 920px; padding: 1rem 1.25rem 3rem; line-height: 1.5; }
+  h1 { font-size: 1.4rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.1rem; margin-top: 1.75rem; border-bottom: 1px solid var(--line); padding-bottom: .25rem; }
+  h3 { font-size: 1rem; margin: 1.25rem 0 .5rem; }
+  section, #status { border: 1px solid var(--line); border-radius: 8px; padding: .75rem 1rem; margin-top: 1rem; }
+  #status[data-state="recovery_required"], #status[data-state="failed"], #status[data-state="unknown"] { border-color: var(--bad); }
+  #status[data-state="seed_required"] { border-color: var(--warn); }
+  #status[data-state="ready"] { border-color: var(--ok); }
+  #status-state { font-weight: 700; font-size: 1.15rem; }
+  .guide, #status-guide { font-size: .92rem; }
+  .warn { color: var(--warn); }
+  #error-view { border: 1px solid var(--bad); border-radius: 8px; padding: .5rem 1rem; margin-top: 1rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+  button { font: inherit; padding: .45rem 1rem; border-radius: 6px; border: 1px solid var(--line); cursor: pointer; }
+  button:disabled { cursor: not-allowed; opacity: .45; }
+  label { font-size: .92rem; }
+  table { border-collapse: collapse; margin: .25rem 0 .75rem; }
+  th, td { border: 1px solid var(--line); padding: .25rem .6rem; text-align: left; font-variant-numeric: tabular-nums; }
+  .chart { display: grid; gap: .6rem; margin-bottom: .75rem; }
+  .bar-label { font-weight: 600; }
+  .bar-line { display: grid; grid-template-columns: 4rem 1fr 7rem; gap: .5rem; align-items: center; }
+  .bar-track { display: block; background: #8882; height: .9rem; border-radius: 3px; }
+  .bar { display: block; height: 100%; border-radius: 3px; }
+  .bar.median { background: #2563eb; }
+  .bar.p90 { background: #9333ea; }
+  .bar-value { text-align: right; font-variant-numeric: tabular-nums; }
+  footer { margin-top: 2rem; font-size: .88rem; }
+</style>
+</head>
+<body>
+<h1>Mini Redis 실시간 성능 비교 (로컬 시연)</h1>
+<p>이 화면은 로컬 실행 서버를 통해 기존 측정기(<code>examples/benchmark.py</code>)를 새로 실행하고, 그 실행의 원자료만 보여 줍니다. 브라우저는 시간을 재지 않습니다. 다른 측정기·사용자와 동시에 실행하지 마세요.</p>
+
+<div id="status" data-state="unknown" role="status" aria-live="polite">
+  <div>준비 상태: <span id="status-state">확인 중</span></div>
+  <div id="status-step"></div>
+  <div id="status-job"></div>
+  <div id="status-message"></div>
+  <div id="status-guide"></div>
+</div>
+
+<div id="error-view" role="alert" hidden></div>
+
+<section aria-labelledby="actions-title">
+  <h2 id="actions-title">작업</h2>
+  <div class="actions">
+    <button type="button" id="setup-button" disabled>준비</button>
+    <button type="button" id="run-button" disabled>비교 실행</button>
+  </div>
+  <p class="guide">준비는 Docker 확인, 전용 MongoDB 컨테이너 기동, 읽기 전용 시드 검사를 합니다. 이번 준비에서 새로 만든 빈 전용 볼륨일 때만 최초 시드를 자동으로 만듭니다. 비교 실행은 시드 검사 → MongoDB 재시작 → 기동·설정 확인 뒤 측정기를 실행합니다.</p>
+  <div id="seed-panel">
+    <h3>시드 재생성 (시드 필요 상태에서만)</h3>
+    <p>시드 재생성은 MongoDB 컬렉션 <code>mini_redis_origin.items</code>를 삭제한 뒤 약 1GB(문서 1,000,001개)로 다시 만듭니다. 아래 확인을 선택해야만 요청합니다.</p>
+    <div class="actions">
+      <label><input type="checkbox" id="seed-confirm" disabled> 기존 컬렉션이 삭제된 뒤 다시 만들어짐을 확인했습니다.</label>
+      <button type="button" id="seed-button" disabled>시드 재생성</button>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="run-title">
+  <h2 id="run-title">최근 실행</h2>
+  <div id="run-view" data-kind="none"><p>확인 중</p></div>
+</section>
+
+<section aria-labelledby="resources-title">
+  <h2 id="resources-title">Docker 자원</h2>
+  <p>화면을 닫거나 서버를 종료해도 Docker 컨테이너 <code>__CONTAINER__</code>와 볼륨 <code>__DATA__</code>, <code>__CONFIG__</code>는 자동으로 중지·삭제되지 않습니다. 이 화면에는 정리 기능이 없습니다. 더 쓰지 않을 때는 화면 밖에서 전용 이름·소유 표지·볼륨 연결을 확인한 뒤 수동으로 정리하며, 진행 중이거나 회수가 확인되지 않은 작업이 있으면 정리하지 마세요.</p>
+</section>
+
+<footer>
+  <h2>결과 해석의 한계</h2>
+  <p>이 결과는 한 로컬 호스트의 순차 HTTP 전체 흐름 비교입니다. OS/Docker 파일 캐시, 동시 부하, 원격 DB, 디스크 I/O는 통제·측정하지 않았습니다. 사전 시드 표본 읽기는 재시작 전에 하므로 OS/Docker 파일 캐시에 영향이 남을 수 있어, 6단계와 같은 캐시 상태라고 단정하지 않습니다. 준비·시드·재시작·서버 기동·상태 준비·표시 시간은 측정 수치에 포함하지 않습니다.</p>
+</footer>
+<script nonce="__NONCE__">
+__SCRIPT__
+</script>
+</body>
+</html>

@@ -630,17 +630,25 @@ def _error(code, message):
     return {"error": {"code": code, "message": message}}
 
 
-PAGE = """<!doctype html>
-<html lang="ko"><head><meta charset="utf-8">
-<meta name="live-bench-token" content="{token}">
-<title>Mini Redis 실시간 성능 비교 (로컬)</title></head>
-<body><h1>Mini Redis 실시간 성능 비교</h1>
-<p>화면은 다음 단계에서 구현합니다. 현재는 로컬 실행 서버 API만 제공합니다.</p>
-<p>화면이나 서버를 종료해도 Docker 컨테이너 <code>{container}</code>와 볼륨 <code>{data}</code>,
-<code>{config}</code>는 중지·삭제되지 않습니다. 정리는 전용 이름·소유 표지·볼륨 연결을 확인한 뒤
-터미널에서 직접 하며, 작업이나 회수가 미확정이면 정리하지 않습니다.</p>
-</body></html>
-"""
+UI_DIR = Path(__file__).resolve().parent
+PAGE_TEMPLATE = (UI_DIR / "live_benchmark_ui.html").read_text(encoding="utf-8")
+PAGE_SCRIPT = (UI_DIR / "live_benchmark_ui.js").read_text(encoding="utf-8")
+assert "</script" not in PAGE_SCRIPT.lower()
+
+
+def render_page(token, nonce):
+    """Static screen; only server constants and the per-start token are substituted."""
+    page = PAGE_TEMPLATE
+    for key, value in (("__CONTAINER__", CONTAINER), ("__DATA__", DATA_VOLUME), ("__CONFIG__", CONFIG_VOLUME),
+                       ("__TOKEN__", html.escape(token)), ("__NONCE__", nonce)):
+        page = page.replace(key, value)
+    return page.replace("__SCRIPT__", PAGE_SCRIPT)
+
+
+def page_csp(nonce):
+    return (f"default-src 'none'; script-src 'nonce-{nonce}'; style-src 'nonce-{nonce}'; "
+            "connect-src 'self'; img-src 'none'; base-uri 'none'; form-action 'none'; "
+            "frame-ancestors 'none'")
 
 
 class LiveBenchmark:
@@ -1314,12 +1322,12 @@ def make_handler(app):
             return self._send(*app.submit(kind))
 
         def _page(self):
-            body = PAGE.format(token=html.escape(app.token), container=CONTAINER, data=DATA_VOLUME,
-                               config=CONFIG_VOLUME).encode("utf-8")
+            nonce = secrets.token_urlsafe(16)
+            body = render_page(app.token, nonce).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Cache-Control", "no-store")
-            self.send_header("Content-Security-Policy", "frame-ancestors 'none'")
+            self.send_header("Content-Security-Policy", page_csp(nonce))
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()

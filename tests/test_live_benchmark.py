@@ -10,6 +10,8 @@ import http.client
 import json
 import os
 import random
+import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -485,7 +487,7 @@ class HttpContractTests(unittest.TestCase):
         status, response, page = h.get("/")
         self.assertEqual(status, 200)
         self.assertTrue(response.getheader("Content-Type").startswith("text/html"))
-        self.assertEqual(response.getheader("Content-Security-Policy"), "frame-ancestors 'none'")
+        self.assertIn("frame-ancestors 'none'", response.getheader("Content-Security-Policy"))
         self.assertEqual(response.getheader("Cache-Control"), "no-store")
         self.assertIn(h.app.token.encode(), page)
         status, response, body = h.get("/api/setup")
@@ -576,6 +578,56 @@ class HttpContractTests(unittest.TestCase):
 
 
 ROOT = Path(__file__).resolve().parent.parent
+UI_TESTS = ROOT / "tests" / "live_benchmark_ui.test.js"
+
+
+class ScreenPageTests(unittest.TestCase):
+    """TC-07-I-017 (page level): what the server ships to the browser."""
+
+    def page(self):
+        h = Harness(self)
+        status, response, page = h.get("/")
+        self.assertEqual(status, 200)
+        return h, response, page.decode("utf-8")
+
+    def test_i_017_page_has_contract_controls_and_notices(self):
+        _, _, page = self.page()
+        for element_id in ("setup-button", "seed-button", "seed-confirm", "run-button",
+                           "status-state", "status-step", "run-view", "error-view"):
+            self.assertIn(f'id="{element_id}"', page)
+        buttons = re.findall(r"<button[^>]*>(.*?)</button>", page, re.S)
+        self.assertEqual(len(buttons), 3, buttons)
+        for label in buttons:
+            self.assertNotRegex(label, "정리|삭제|cleanup|remove")
+        for phrase in ("한 로컬 호스트의 순차 HTTP 전체 흐름", "OS/Docker 파일 캐시", "동시 부하",
+                       "원격 DB", "디스크 I/O", "측정 수치에 포함하지 않습니다",
+                       "자동으로 중지·삭제되지 않습니다", "약 1GB", lb.CONTAINER, lb.DATA_VOLUME):
+            self.assertIn(phrase, page)
+        self.assertNotRegex(page, r"https?://")  # no external CDN or network resource
+
+    def test_i_017_script_is_inline_nonce_bound_and_never_parses_html(self):
+        h, response, page = self.page()
+        csp = response.getheader("Content-Security-Policy")
+        nonce = re.search(r"script-src 'nonce-([A-Za-z0-9_-]+)'", csp).group(1)
+        self.assertIn("default-src 'none'", csp)
+        self.assertIn("connect-src 'self'", csp)
+        scripts = re.findall(r"<script([^>]*)>(.*?)</script>", page, re.S)
+        self.assertEqual(len(scripts), 1)
+        self.assertIn(f'nonce="{nonce}"', scripts[0][0])
+        self.assertNotIn("src=", scripts[0][0])
+        for sink in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write", "eval(",
+                     "new Function"):
+            self.assertNotIn(sink, scripts[0][1])
+        self.assertNotEqual(nonce, re.search(r"'nonce-([A-Za-z0-9_-]+)'",
+                                             h.get("/")[1].getheader("Content-Security-Policy")).group(1))
+
+    def test_i_017_screen_logic_node_tests(self):
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("node not installed: screen logic tests not run")
+        done = subprocess.run([node, "--test", str(UI_TESTS)], cwd=ROOT, capture_output=True,
+                              text=True, timeout=120)
+        self.assertEqual(done.returncode, 0, done.stdout[-3000:] + done.stderr[-2000:])
 
 
 class FailingWrite:

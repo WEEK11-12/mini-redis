@@ -65,3 +65,37 @@ python3 -B -m examples.live_benchmark --recover     # 서버를 멈춘 뒤 미�
 - 준비 중 Docker CLI 호출은 새 세션이 아니다. 서버가 SIGKILL되면 진행 중이던 CLI가 자체 제한 시간까지 남을 수 있으며, 표지 환경 변수 때문에 그동안 `--recover`는 해제하지 않는다. 정상 종료 요청 시 진행 중인 Docker 단계(최대 pull 600초)는 끝난 뒤 멈춘다.
 - 상세 기록이 사라진 작업은 `--recover`로 해제할 수 없어 수동 조사·별도 결정이 필요하다(의도한 기본 차단).
 - 정리 버튼/API는 없다. 수동 정리 명령은 실제 자원 확인 뒤 문서화하기로 한 설계에 따라 아직 작성하지 않았다.
+
+## 체크포인트 4 — 웹 화면 (2026-11-19)
+
+- **상태:** 화면 구현과 자동 검증(이중물·격리 서버·headless 브라우저) 완료. 실제 Docker·`benchmark.py` 결과를 표시해 본 적은 없어 진행 체크리스트 4번은 체크하지 않았다.
+
+| 경로 | 역할 |
+| --- | --- |
+| `examples/live_benchmark_ui.html` (신규) | 정적 화면 틀: 준비 상태, 작업 버튼 3개(준비·비교 실행·시드 재생성), 시드 삭제 영향 확인, 최근 실행, Docker 자원 유지 안내, 결과 해석 한계 |
+| `examples/live_benchmark_ui.js` (신규) | 화면 판단 함수(`controls`, `banner`, `runView`, `guideFor`, `stepLabel`, `seedRequest`)와 브라우저 연결. Node에서 같은 파일을 `require`해 시험 |
+| `examples/live_benchmark.py` | 기존 임시 페이지 대신 위 두 파일을 시작 시 읽어 `GET /`에 인라인으로 제공(`render_page`, `page_csp`). 새 경로·API 없음 |
+| `tests/live_benchmark_ui.test.js` (신규) | 화면 판단 Node 테스트 12개(검증 지적 반영 3개 포함) |
+| `tests/test_live_benchmark.py` | `ScreenPageTests` 3개 추가, I-006 CSP 기대값을 "포함"으로 변경 |
+
+**구현 선택**
+
+- 정적 자원은 별도 경로 없이 HTML 하나에 인라인. 응답마다 새 nonce를 만들고 CSP를 `default-src 'none'; script-src 'nonce-…'; style-src 'nonce-…'; connect-src 'self'; img-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`으로 보낸다(계약의 `frame-ancestors 'none'`을 포함하는 확장). 외부 CDN·네트워크 자원은 없다.
+- 토큰은 서버가 `<meta name="live-bench-token">`에 HTML 이스케이프해 넣고, 스크립트는 그 값을 POST의 `X-Live-Bench-Token`으로만 쓴다. 서버 응답 문자열은 모두 `textContent`로 넣고 `innerHTML` 계열·`eval`을 쓰지 않는다. 막대 너비는 CSSOM(`element.style.width`)으로 설정한다.
+- 상태 조회는 1초마다 `GET /api/setup`, 그다음 `active_job.run_id` 또는 `last_run_id`로 `GET /api/runs/{id}`. 새로고침 뒤에도 같은 실행 ID를 다시 찾는다(브라우저 저장소 미사용).
+- 버튼 활성: 진행 중 작업(`active_job`)이 있거나 상태가 `preparing`·`recovery_required`·알 수 없는 값이면 모두 비활성. 그 외 준비는 `not_ready`·`ready`·`seed_required`·`failed`, 비교 실행은 `ready`, 시드 재생성은 `seed_required`이면서 삭제 영향 확인 체크박스를 선택한 경우만. 요청 뒤 체크박스는 해제한다.
+- **복구 우선:** `recovery_required`면 실행 기록이 `running`/`preparing`으로 남아 있어도 배너는 복구 필요와 `--recover` 안내를 보이고 버튼을 막는다. 실행 기록이 `running`/`preparing`인데 서버의 `active_job.run_id`와 다르거나 복구 차단 중이면 진행 중으로 표시하지 않고 "종결되지 않은 기록, 결과로 보지 않음"으로 표시한다.
+- **결과 표시:** `succeeded`이고 `result.conditions`가 정확히 세 조건이며 각 중앙값·P90이 유한한 비음수, 성공 100·실패 0이고 `method`·`environment`가 객체일 때만 비교 그래프(중앙값·P90 막대)와 표를 그린다. 아니면 "결과 형식 확인 불가"로 수치를 숨긴다. `failed`/`timed_out`은 서버가 준 `partial`의 정수 성공·실패 수만 "완결 결과 아님" 표로 보이고 그래프는 그리지 않는다.
+- 진행 중에는 단계 이름만 보이고 퍼센트·조건별 수치·경과 시간은 표시하지 않는다.
+- 오류 코드별 안내는 계약·구현의 코드 전부에 고정 문구로 둔다. 알 수 없는 코드는 일반 문구를 쓴다. 화면 전용으로 요청 실패를 `NETWORK`, 오류 본문이 없는 응답을 `HTTP_<상태>`로 오류 상자에만 표시한다(서버 상태·API 이름이 아님).
+- 정리·삭제 버튼은 없다. 자원 안내는 자동 중지·삭제되지 않는다는 사실과 수동 정리 원칙만 적고 구체 명령은 넣지 않았다(아래 결정 필요 항목).
+
+**결정이 필요한 항목 (임의로 정하지 않음)**
+
+1. 계약·E-003은 화면에 "전용 자원의 안전한 수동 정리 방법"을 요구하지만, 설계 4.4는 실제 정리 명령을 실제 자원 확인 뒤 문서화하도록 했다. 현재 화면은 원칙만 있고 명령이 없다.
+2. 복구 필요 상태에서 서버 메시지와 화면 안내가 모두 `--recover`를 말해 문구가 중복된다(기능 영향 없음). 단 `SHARED_RECORD_UNREADABLE`은 서버 메시지 자체에 `--recover` 안내가 붙지만 `--recover`로 해소되지 않는다. 서버 문구는 이번 범위 밖이라 바꾸지 않았다.
+
+**독립 검증 지적 반영 (2026-11-19)** — `examples/live_benchmark_ui.js`만 변경(HTML·서버 불변)
+
+- `banner()`(80줄~): 복구 필요 상태에서 차단 코드가 `SHARED_RECORD_MISSING`·`SHARED_RECORD_UNVERIFIED`·`SHARED_RECORD_UNREADABLE`이면 `--recover` 대신 기존 `guideFor(code)`를 보인다(`NOT_RECOVERABLE`, 24줄). `run_recover`는 공유 기록이 없거나 읽을 수 없으면 아무것도 해제하지 않으므로 세 코드 모두 해당한다. 그 밖의 복구 필요 코드는 그대로 `--recover` 안내. 새 상태·코드 없음.
+- `createPoller()`(97줄~): 정기 폴링은 진행 중인 조회가 있으면 건너뛰고(`skipped`), POST 직후 갱신은 강제로 새 조회를 보내며(`force`), 요청 순번이 마지막 반영분보다 오래된 응답은 버린다(`stale`). 브라우저 연결부는 조회를 `fetchState()`(365줄~)로 분리해 순수 결과만 돌려주고 반영은 poller가 한다(379~395줄).

@@ -1,6 +1,6 @@
 # 이터레이션 안내와 진행 결과
 
-- 상태: 1~6단계 각각의 합의한 범위 완료 (상세 결과·한계는 단계별 검증 기록 참조). 7단계 웹 뷰는 [계약 채택·구현 전 TC 조건부 검토 의견 반영](07-live-benchmark-ui/overview.md); 로컬 서버 연결 구현·이중물 기반 자동 검증 47/47(검토 결함 2건 수정 후)([검증 기록](07-live-benchmark-ui/verification.md)), 실제 Docker·화면·독립 검토와 TC 수정본 재점검 미실행
+- 상태: 1~6단계 각각의 합의한 범위 완료 (상세 결과·한계는 단계별 검증 기록 참조). 7단계 웹 뷰는 [계약 채택·구현 전 TC 조건부 검토 의견 반영](07-live-benchmark-ui/overview.md); 로컬 서버 연결 구현·이중물 기반 자동 검증 47/47(검토 결함 2건 수정 후), 웹 화면 구현·이중물/headless 브라우저 확인(전체 50/50)([검증 기록](07-live-benchmark-ui/verification.md)), 실제 Docker·화면·독립 검토와 TC 수정본 재점검 미실행
 - 근거: [과제 원문](../assignment.md), [프로젝트 진행 결정](../decisions/0001-project-workflow.md)
 
 ## 이터레이션의 의미와 읽는 순서
