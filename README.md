@@ -272,5 +272,6 @@ HTTP 진입점은 [api.py](mini_redis/api.py), 저장소 핵심은 [store.py](mi
 | 테스트 계획과 실제 실행 결과 | [테스트 계획](docs/TESTING.md) · [단위별 기록](history/README.md) |
 | 함께 작업하는 방법 | [작업 방식](docs/WORKFLOW.md) · [AI 안내](AGENTS.md) · [작업 인계](WORKLOG.md) |
 | Redis 개념 공부 | [학습 목차](study/00-overview.md) |
+| 팀원별 프로젝트 소감 | [프로젝트 소감](docs/RETROSPECTIVE.md) |
 
 개인 저장소는 [jye-1123/mini-redis](https://github.com/jye-1123/mini-redis)의 `main`, 팀 공유 브랜치는 [WEEK11-12/mini-redis의 yeongeun-main](https://github.com/WEEK11-12/mini-redis/tree/yeongeun-main)입니다.
