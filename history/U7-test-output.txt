@@ -1,0 +1,64 @@
+test_body_limit_and_content_type (test_api.ApiTests.test_body_limit_and_content_type) ... ok
+test_invalid_fields_types_and_ttl_preserve_data_and_deadline (test_api.ApiTests.test_invalid_fields_types_and_ttl_preserve_data_and_deadline) ... ok
+test_malformed_duplicate_and_non_object_json (test_api.ApiTests.test_malformed_duplicate_and_non_object_json) ... ok
+test_round_trip_empty_and_unicode (test_api.ApiTests.test_round_trip_empty_and_unicode) ... ok
+test_routing_and_internal_errors_are_json (test_api.ApiTests.test_routing_and_internal_errors_are_json) ... ok
+test_ttl_boundary_delete_and_overwrite (test_api.ApiTests.test_ttl_boundary_delete_and_overwrite) ... ok
+test_utf8_size_boundaries_and_preservation (test_api.ApiTests.test_utf8_size_boundaries_and_preservation) ... ok
+test_bypass_miss_hit_and_original_calls (test_cache_demo.CacheDemoTests.test_bypass_miss_hit_and_original_calls) ... ok
+test_expiration_and_delete_fetch_again (test_cache_demo.CacheDemoTests.test_expiration_and_delete_fetch_again) ... ok
+test_html_no_store_and_dependency_failure (test_cache_demo.CacheDemoTests.test_html_no_store_and_dependency_failure) ... [2026-11-14 20:24:41,814] WARNING in cache_demo: Demo dependency failed: HTTPError
+ok
+test_t11_default_100_key_limit_in_long_chain (test_cleanup.CleanupTests.test_t11_default_100_key_limit_in_long_chain) ... ok
+test_t11_deleted_cursor_target_and_predecessor (test_cleanup.CleanupTests.test_t11_deleted_cursor_target_and_predecessor) ... ok
+test_t11_empty_bucket_limit_and_progress (test_cleanup.CleanupTests.test_t11_empty_bucket_limit_and_progress) ... ok
+test_t11_expired_only_and_one_full_pass (test_cleanup.CleanupTests.test_t11_expired_only_and_one_full_pass) ... ok
+test_t11_head_insert_during_partial_scan (test_cleanup.CleanupTests.test_t11_head_insert_during_partial_scan) ... ok
+test_t11_invalid_limits_do_not_mutate_store (test_cleanup.CleanupTests.test_t11_invalid_limits_do_not_mutate_store) ... ok
+test_t11_multiple_rounds_reach_later_buckets (test_cleanup.CleanupTests.test_t11_multiple_rounds_reach_later_buckets) ... ok
+test_t11_passive_expiration_repairs_cursor (test_cleanup.CleanupTests.test_t11_passive_expiration_repairs_cursor) ... ok
+test_t11_renew_before_cleanup_preserves_new_deadline (test_cleanup.CleanupTests.test_t11_renew_before_cleanup_preserves_new_deadline) ... ok
+test_t11_resize_resets_cursor_and_keeps_new_table_valid (test_cleanup.CleanupTests.test_t11_resize_resets_cursor_and_keeps_new_table_valid) ... ok
+test_t11_renewal_waits_for_atomic_check_and_delete (test_cleanup.WorkerTests.test_t11_renewal_waits_for_atomic_check_and_delete) ... ok
+test_t12_import_does_not_start_thread (test_cleanup.WorkerTests.test_t12_import_does_not_start_thread) ... ok
+test_t12_invalid_interval (test_cleanup.WorkerTests.test_t12_invalid_interval) ... ok
+test_t12_start_once_and_cleanup_without_requests (test_cleanup.WorkerTests.test_t12_start_once_and_cleanup_without_requests) ... ok
+test_t12_stop_wakes_wait_without_waiting_for_interval (test_cleanup.WorkerTests.test_t12_stop_wakes_wait_without_waiting_for_interval) ... ok
+test_resume_then_remove_only_expired_middle_node (test_cleanup_focus.CleanupFocusTest.test_resume_then_remove_only_expired_middle_node) ... ok
+test_t13_distinct_keys_wait_then_store_read_delete (test_concurrency.ConcurrencyTests.test_t13_distinct_keys_wait_then_store_read_delete) ... ok
+test_t13_new_writes_preserved_across_resize (test_concurrency.ConcurrencyTests.test_t13_new_writes_preserved_across_resize) ... ok
+test_actual_waitress_requests_limits_and_worker_lifecycle (test_server.ServerTests.test_actual_waitress_requests_limits_and_worker_lifecycle) ... ok
+test_import_does_not_start_threads_or_server (test_server.ServerTests.test_import_does_not_start_threads_or_server) ... ok
+test_worker_stops_even_if_server_start_fails (test_server.ServerTests.test_worker_stops_even_if_server_start_fails) ... ok
+test_t07_empty_and_original_text (test_store.InputAndResizeTests.test_t07_empty_and_original_text) ... ok
+test_t07_key_utf8_byte_boundary (test_store.InputAndResizeTests.test_t07_key_utf8_byte_boundary) ... ok
+test_t07_non_string_keys_rejected_in_all_operations (test_store.InputAndResizeTests.test_t07_non_string_keys_rejected_in_all_operations) ... ok
+test_t07_non_string_values_preserve_existing_data (test_store.InputAndResizeTests.test_t07_non_string_values_preserve_existing_data) ... ok
+test_t07_value_utf8_byte_boundary (test_store.InputAndResizeTests.test_t07_value_utf8_byte_boundary) ... ok
+test_t08_known_fnv1a_64_vectors (test_store.InputAndResizeTests.test_t08_known_fnv1a_64_vectors) ... ok
+test_t09_invalid_insert_does_not_trigger_resize (test_store.InputAndResizeTests.test_t09_invalid_insert_does_not_trigger_resize) ... ok
+test_t09_overwrite_at_threshold_does_not_resize (test_store.InputAndResizeTests.test_t09_overwrite_at_threshold_does_not_resize) ... ok
+test_t09_repeated_resize_then_update_and_delete (test_store.InputAndResizeTests.test_t09_repeated_resize_then_update_and_delete) ... ok
+test_t09_thirteenth_new_key_resizes_and_preserves_values (test_store.InputAndResizeTests.test_t09_thirteenth_new_key_resizes_and_preserves_values) ... ok
+test_t01_save_and_get (test_store.StoreTests.test_t01_save_and_get) ... ok
+test_t02_overwrite_preserves_count (test_store.StoreTests.test_t02_overwrite_preserves_count) ... ok
+test_t03_delete_then_get (test_store.StoreTests.test_t03_delete_then_get) ... ok
+test_t04_missing_key_preserves_existing_data (test_store.StoreTests.test_t04_missing_key_preserves_existing_data) ... ok
+test_t05_collisions_remain_distinct (test_store.StoreTests.test_t05_collisions_remain_distinct) ... ok
+test_t06_delete_each_position_in_collision_chain (test_store.StoreTests.test_t06_delete_each_position_in_collision_chain) ... ok
+test_t10_arbitrarily_large_positive_ttl (test_ttl.TTLTests.test_t10_arbitrarily_large_positive_ttl) ... ok
+test_t10_exact_expiration_boundary (test_ttl.TTLTests.test_t10_exact_expiration_boundary) ... ok
+test_t10_expired_delete_is_false_but_removes_node (test_ttl.TTLTests.test_t10_expired_delete_is_false_but_removes_node) ... ok
+test_t10_invalid_ttl_preserves_value_and_deadline (test_ttl.TTLTests.test_t10_invalid_ttl_preserves_value_and_deadline) ... ok
+test_t10_len_counts_expired_nodes_until_access (test_ttl.TTLTests.test_t10_len_counts_expired_nodes_until_access) ... ok
+test_t10_live_delete_is_true (test_ttl.TTLTests.test_t10_live_delete_is_true) ... ok
+test_t10_new_ttl_starts_at_new_write (test_ttl.TTLTests.test_t10_new_ttl_starts_at_new_write) ... ok
+test_t10_omitted_ttl_never_expires (test_ttl.TTLTests.test_t10_omitted_ttl_never_expires) ... ok
+test_t10_overwrite_removes_previous_ttl (test_ttl.TTLTests.test_t10_overwrite_removes_previous_ttl) ... ok
+test_t10_reinsert_expired_key_and_preserve_ttl_during_resize (test_ttl.TTLTests.test_t10_reinsert_expired_key_and_preserve_ttl_during_resize) ... ok
+
+----------------------------------------------------------------------
+Ran 57 tests in 0.797s
+
+OK
+Waitress pre-Flask rejection: 413 text/plain, exceeds max_body

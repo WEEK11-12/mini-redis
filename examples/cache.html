@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mini Redis · 상품 캐시 실험</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #202a38; background: #f5f6f8; }
+    body { max-width: 900px; margin: 48px auto; padding: 0 20px; }
+    h1 { font-size: 28px; letter-spacing: -1px; margin-bottom: 12px; }
+    p { line-height: 1.7; }
+    .muted { color: #596577; }
+    section { background: white; border: 1px solid #dce1e8; border-radius: 12px; padding: 24px; margin: 20px 0; }
+    .flow { padding: 14px; background: #eef2ff; border-radius: 8px; line-height: 1.8; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+    button { border: 1px solid #b9c3d3; background: white; color: #263449; padding: 12px 18px; border-radius: 8px; font: inherit; cursor: pointer; }
+    button.primary { background: #354fc4; color: white; border-color: #354fc4; }
+    button:disabled { opacity: .5; cursor: wait; }
+    button:focus-visible { outline: 3px solid #7894ff; outline-offset: 3px; }
+    #status { min-height: 28px; font-weight: 600; }
+    #product { font-size: 20px; }
+    li { line-height: 1.8; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    th, td { text-align: left; padding: 12px 8px; border-bottom: 1px solid #e4e8ed; }
+    th { font-size: 14px; color: #596577; }
+    @media (max-width: 600px) { body { margin-top: 24px; } section { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <p class="muted">MINI REDIS / CACHE DEMO</p>
+  <h1>같은 상품을 다시 조회하면?</h1>
+  <p class="muted">원본 API는 요청마다 50ms를 기다립니다. Mini Redis에 저장한 정보는 1초 뒤 만료됩니다.</p>
+  <div class="flow">브라우저 → 예제 서버 → Mini Redis 조회 → 정보가 없으면 원본 API 조회·저장</div>
+  <section>
+    <h2>키보드 가격 조회</h2>
+    <div class="buttons">
+      <button type="button" data-action="bypass">캐시 없이 조회</button>
+      <button type="button" class="primary" data-action="cache">캐시로 조회</button>
+      <button type="button" data-action="delete">캐시 삭제</button>
+    </div>
+    <p id="status" role="status" aria-live="polite">버튼을 눌러 요청을 보내보세요.</p>
+    <p id="product">상품 정보가 아직 없습니다.</p>
+    <ol id="steps"></ol>
+    <p class="muted">캐시로 조회를 빠르게 두 번 누르면 MISS → HIT를 볼 수 있습니다. 1초 이상 기다리거나 삭제한 뒤 다시 조회해보세요.</p>
+  </section>
+  <section>
+    <h2>요청 기록</h2>
+    <p class="muted">시간은 예제 서버의 조회 처리 시간입니다. 원본 호출은 상품 API의 누적 호출 수이며, 화면 통계 조회는 세지 않습니다.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">순서</th><th scope="col">처리 경로</th><th scope="col">처리 시간</th><th scope="col">원본 호출</th></tr></thead>
+        <tbody id="history"></tbody>
+      </table>
+    </div>
+  </section>
+  <p class="muted">50ms는 관찰을 위한 인위적 대기입니다. 실제 DB의 속도를 측정한 결과가 아닙니다. 여러 사용자의 동시 조회·원본 갱신은 이 예제의 범위가 아닙니다.</p>
+  <script>
+    const buttons = [...document.querySelectorAll('button')];
+    const status = document.querySelector('#status');
+    const history = document.querySelector('#history');
+    async function readJson(url, options) {
+      const response = await fetch(url, {cache: 'no-store', ...options});
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || '요청에 실패했습니다.');
+      return body;
+    }
+    for (const button of buttons) {
+      button.addEventListener('click', async () => {
+        buttons.forEach(item => item.disabled = true);
+        status.textContent = '요청을 처리하고 있습니다…';
+        try {
+          const action = button.dataset.action;
+          const result = action === 'delete'
+            ? await readJson('/cache/delete', {method: 'POST'})
+            : await readJson('/product?cache=' + (action === 'bypass' ? '0' : '1'));
+          const stats = await readJson('/stats');
+          document.querySelector('#steps').replaceChildren();
+          if (action === 'delete') {
+            status.textContent = result.deleted ? '캐시를 삭제했습니다.' : '삭제할 유효한 캐시가 없습니다.';
+          } else {
+            const descriptions = {BYPASS: '원본에서 직접 조회', MISS: '캐시 없음 → 원본 조회·저장', HIT: '캐시에서 조회'};
+            status.textContent = result.source + ' · ' + descriptions[result.source];
+            document.querySelector('#product').textContent = result.product.name + ' · ' + result.product.price.toLocaleString('ko-KR') + '원';
+            for (const step of result.steps) {
+              const item = document.createElement('li');
+              item.textContent = step;
+              document.querySelector('#steps').append(item);
+            }
+          }
+          const row = document.createElement('tr');
+          for (const value of [history.rows.length + 1, action === 'delete' ? 'DELETE' : result.source,
+            action === 'delete' ? '—' : result.elapsed_ms.toFixed(2) + ' ms', stats.origin_calls + '회']) {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            row.append(cell);
+          }
+          history.prepend(row);
+        } catch (error) {
+          status.textContent = error.message;
+        } finally {
+          buttons.forEach(item => item.disabled = false);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1004 @@
+{
+  "result": "PASS",
+  "python": "3.13.14",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "total_keys": 10000,
+  "expired_keys": 7000,
+  "valid_keys_preserved": 3000,
+  "value_utf8_bytes": 128,
+  "bucket_count": 16384,
+  "interval_seconds": 0.1,
+  "round_count": 164,
+  "cleanup_elapsed_seconds": 17.941341199999442,
+  "max_keys_checked": 78,
+  "max_buckets_visited": 100,
+  "max_cleanup_duration_ms": 0.2730999985942617,
+  "clock": "fixed injected nanoseconds; real worker and waits",
+  "scope": "cleanup only; no HTTP or concurrent request workload",
+  "rounds": [
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.1540000012028031
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.08150000212481245
+    },
+    {
+      "keys_checked": 59,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.07969999933266081
+    },
+    {
+      "keys_checked": 48,
+      "buckets_visited": 100,
+      "deleted": 32,
+      "duration_ms": 0.13890000263927504
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.1646999990043696
+    },
+    {
+      "keys_checked": 60,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.08189999789465219
+    },
+    {
+      "keys_checked": 67,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.08719999823370017
+    },
+    {
+      "keys_checked": 56,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.14060000103199854
+    },
+    {
+      "keys_checked": 63,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.16619999951217324
+    },
+    {
+      "keys_checked": 53,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.12010000136797316
+    },
+    {
+      "keys_checked": 68,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.14980000196374021
+    },
+    {
+      "keys_checked": 55,
+      "buckets_visited": 100,
+      "deleted": 37,
+      "duration_ms": 0.0732000007701572
+    },
+    {
+      "keys_checked": 65,
+      "buckets_visited": 100,
+      "deleted": 46,
+      "duration_ms": 0.09589999899617396
+    },
+    {
+      "keys_checked": 55,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.07069999992381781
+    },
+    {
+      "keys_checked": 75,
+      "buckets_visited": 100,
+      "deleted": 55,
+      "duration_ms": 0.07350000305450521
+    },
+    {
+      "keys_checked": 48,
+      "buckets_visited": 100,
+      "deleted": 31,
+      "duration_ms": 0.0732000007701572
+    },
+    {
+      "keys_checked": 68,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.07310000000870787
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.0732000007701572
+    },
+    {
+      "keys_checked": 65,
+      "buckets_visited": 100,
+      "deleted": 44,
+      "duration_ms": 0.1095000006898772
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.16400000095018186
+    },
+    {
+      "keys_checked": 60,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.08350000280188397
+    },
+    {
+      "keys_checked": 51,
+      "buckets_visited": 100,
+      "deleted": 32,
+      "duration_ms": 0.10730000212788582
+    },
+    {
+      "keys_checked": 68,
+      "buckets_visited": 100,
+      "deleted": 49,
+      "duration_ms": 0.10110000221175142
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.14480000027106144
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.17110000044340268
+    },
+    {
+      "keys_checked": 53,
+      "buckets_visited": 100,
+      "deleted": 35,
+      "duration_ms": 0.1965000010386575
+    },
+    {
+      "keys_checked": 48,
+      "buckets_visited": 100,
+      "deleted": 33,
+      "duration_ms": 0.11979999908362515
+    },
+    {
+      "keys_checked": 75,
+      "buckets_visited": 100,
+      "deleted": 53,
+      "duration_ms": 0.13810000018565916
+    },
+    {
+      "keys_checked": 57,
+      "buckets_visited": 100,
+      "deleted": 39,
+      "duration_ms": 0.07520000144722871
+    },
+    {
+      "keys_checked": 63,
+      "buckets_visited": 100,
+      "deleted": 39,
+      "duration_ms": 0.07589999950141646
+    },
+    {
+      "keys_checked": 47,
+      "buckets_visited": 100,
+      "deleted": 32,
+      "duration_ms": 0.11150000136694871
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.12820000119972974
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.09380000119563192
+    },
+    {
+      "keys_checked": 65,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.16279999908874743
+    },
+    {
+      "keys_checked": 54,
+      "buckets_visited": 100,
+      "deleted": 34,
+      "duration_ms": 0.07360000017797574
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.14490000103251077
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 44,
+      "duration_ms": 0.2652000002854038
+    },
+    {
+      "keys_checked": 60,
+      "buckets_visited": 100,
+      "deleted": 39,
+      "duration_ms": 0.11530000119819306
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.06639999992330559
+    },
+    {
+      "keys_checked": 50,
+      "buckets_visited": 100,
+      "deleted": 35,
+      "duration_ms": 0.10820000170497224
+    },
+    {
+      "keys_checked": 68,
+      "buckets_visited": 100,
+      "deleted": 46,
+      "duration_ms": 0.08549999984097667
+    },
+    {
+      "keys_checked": 55,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.07619999814778566
+    },
+    {
+      "keys_checked": 57,
+      "buckets_visited": 100,
+      "deleted": 36,
+      "duration_ms": 0.06600000051548705
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.11889999950653873
+    },
+    {
+      "keys_checked": 59,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.12630000128410757
+    },
+    {
+      "keys_checked": 52,
+      "buckets_visited": 100,
+      "deleted": 30,
+      "duration_ms": 0.07209999967017211
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 48,
+      "duration_ms": 0.15669999993406236
+    },
+    {
+      "keys_checked": 60,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.08100000195554458
+    },
+    {
+      "keys_checked": 60,
+      "buckets_visited": 100,
+      "deleted": 48,
+      "duration_ms": 0.07420000110869296
+    },
+    {
+      "keys_checked": 70,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.09510000018053688
+    },
+    {
+      "keys_checked": 63,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.07560000085504726
+    },
+    {
+      "keys_checked": 51,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.11760000052163377
+    },
+    {
+      "keys_checked": 51,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.07230000119307078
+    },
+    {
+      "keys_checked": 68,
+      "buckets_visited": 100,
+      "deleted": 50,
+      "duration_ms": 0.08059999890974723
+    },
+    {
+      "keys_checked": 65,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.07099999857018702
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.07879999975557439
+    },
+    {
+      "keys_checked": 46,
+      "buckets_visited": 100,
+      "deleted": 34,
+      "duration_ms": 0.08130000060191378
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 46,
+      "duration_ms": 0.07800000093993731
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.15690000145696104
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.07819999882485718
+    },
+    {
+      "keys_checked": 52,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.07530000220867805
+    },
+    {
+      "keys_checked": 53,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.07399999958579428
+    },
+    {
+      "keys_checked": 75,
+      "buckets_visited": 100,
+      "deleted": 57,
+      "duration_ms": 0.09030000001075678
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 37,
+      "duration_ms": 0.08009999874047935
+    },
+    {
+      "keys_checked": 56,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.09619999764254317
+    },
+    {
+      "keys_checked": 56,
+      "buckets_visited": 100,
+      "deleted": 39,
+      "duration_ms": 0.08039999738684855
+    },
+    {
+      "keys_checked": 65,
+      "buckets_visited": 100,
+      "deleted": 53,
+      "duration_ms": 0.09309999950346537
+    },
+    {
+      "keys_checked": 68,
+      "buckets_visited": 100,
+      "deleted": 49,
+      "duration_ms": 0.22600000011152588
+    },
+    {
+      "keys_checked": 59,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.09100000170292333
+    },
+    {
+      "keys_checked": 52,
+      "buckets_visited": 100,
+      "deleted": 33,
+      "duration_ms": 0.11929999891435727
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.07710000136285089
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 46,
+      "duration_ms": 0.0777000022935681
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.07760000153211877
+    },
+    {
+      "keys_checked": 54,
+      "buckets_visited": 100,
+      "deleted": 34,
+      "duration_ms": 0.11439999798312783
+    },
+    {
+      "keys_checked": 54,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.07790000017848797
+    },
+    {
+      "keys_checked": 75,
+      "buckets_visited": 100,
+      "deleted": 53,
+      "duration_ms": 0.13639999815495685
+    },
+    {
+      "keys_checked": 53,
+      "buckets_visited": 100,
+      "deleted": 36,
+      "duration_ms": 0.12269999933778308
+    },
+    {
+      "keys_checked": 69,
+      "buckets_visited": 100,
+      "deleted": 51,
+      "duration_ms": 0.08270000034826808
+    },
+    {
+      "keys_checked": 50,
+      "buckets_visited": 100,
+      "deleted": 32,
+      "duration_ms": 0.12129999959142879
+    },
+    {
+      "keys_checked": 67,
+      "buckets_visited": 100,
+      "deleted": 49,
+      "duration_ms": 0.14150000060908496
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.12939999942318536
+    },
+    {
+      "keys_checked": 71,
+      "buckets_visited": 100,
+      "deleted": 51,
+      "duration_ms": 0.10570000085863285
+    },
+    {
+      "keys_checked": 46,
+      "buckets_visited": 100,
+      "deleted": 30,
+      "duration_ms": 0.17799999841372482
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 44,
+      "duration_ms": 0.1325999983237125
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.08159999924828298
+    },
+    {
+      "keys_checked": 70,
+      "buckets_visited": 100,
+      "deleted": 48,
+      "duration_ms": 0.12960000094608404
+    },
+    {
+      "keys_checked": 52,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.09029999637277797
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.16119999781949446
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.12720000086119398
+    },
+    {
+      "keys_checked": 65,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.07249999907799065
+    },
+    {
+      "keys_checked": 67,
+      "buckets_visited": 100,
+      "deleted": 51,
+      "duration_ms": 0.0990999978967011
+    },
+    {
+      "keys_checked": 57,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.08090000119409524
+    },
+    {
+      "keys_checked": 50,
+      "buckets_visited": 100,
+      "deleted": 32,
+      "duration_ms": 0.11989999984507449
+    },
+    {
+      "keys_checked": 72,
+      "buckets_visited": 100,
+      "deleted": 49,
+      "duration_ms": 0.11109999832115136
+    },
+    {
+      "keys_checked": 55,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.06750000102329068
+    },
+    {
+      "keys_checked": 68,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.2041000007011462
+    },
+    {
+      "keys_checked": 54,
+      "buckets_visited": 100,
+      "deleted": 36,
+      "duration_ms": 0.15390000044135377
+    },
+    {
+      "keys_checked": 70,
+      "buckets_visited": 100,
+      "deleted": 46,
+      "duration_ms": 0.12169999899924733
+    },
+    {
+      "keys_checked": 55,
+      "buckets_visited": 100,
+      "deleted": 39,
+      "duration_ms": 0.07560000085504726
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.08009999874047935
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.07529999857069924
+    },
+    {
+      "keys_checked": 72,
+      "buckets_visited": 100,
+      "deleted": 52,
+      "duration_ms": 0.1984999980777502
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.0776999986555893
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.13249999756226316
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.11439999798312783
+    },
+    {
+      "keys_checked": 56,
+      "buckets_visited": 100,
+      "deleted": 44,
+      "duration_ms": 0.15390000044135377
+    },
+    {
+      "keys_checked": 66,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.12120000246795826
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 48,
+      "duration_ms": 0.14740000187885016
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.07779999941703863
+    },
+    {
+      "keys_checked": 54,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.07829999958630651
+    },
+    {
+      "keys_checked": 69,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.09490000229561701
+    },
+    {
+      "keys_checked": 67,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.11110000195913017
+    },
+    {
+      "keys_checked": 65,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.14589999773306772
+    },
+    {
+      "keys_checked": 56,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.09249999857274815
+    },
+    {
+      "keys_checked": 66,
+      "buckets_visited": 100,
+      "deleted": 49,
+      "duration_ms": 0.130899999930989
+    },
+    {
+      "keys_checked": 67,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.22900000112713315
+    },
+    {
+      "keys_checked": 70,
+      "buckets_visited": 100,
+      "deleted": 49,
+      "duration_ms": 0.08209999941755086
+    },
+    {
+      "keys_checked": 59,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.17049999951268546
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.07829999958630651
+    },
+    {
+      "keys_checked": 71,
+      "buckets_visited": 100,
+      "deleted": 52,
+      "duration_ms": 0.12350000179139897
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.11720000111381523
+    },
+    {
+      "keys_checked": 67,
+      "buckets_visited": 100,
+      "deleted": 47,
+      "duration_ms": 0.1235999989148695
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 50,
+      "duration_ms": 0.13499999840860255
+    },
+    {
+      "keys_checked": 67,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.12720000086119398
+    },
+    {
+      "keys_checked": 67,
+      "buckets_visited": 100,
+      "deleted": 50,
+      "duration_ms": 0.15600000187987462
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.10960000145132653
+    },
+    {
+      "keys_checked": 60,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.1261000033991877
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 46,
+      "duration_ms": 0.12429999696905725
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.12879999849246815
+    },
+    {
+      "keys_checked": 66,
+      "buckets_visited": 100,
+      "deleted": 50,
+      "duration_ms": 0.07990000085555948
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.11580000136746094
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 43,
+      "duration_ms": 0.0760000002628658
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 37,
+      "duration_ms": 0.07999999797903001
+    },
+    {
+      "keys_checked": 57,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.1145999995060265
+    },
+    {
+      "keys_checked": 69,
+      "buckets_visited": 100,
+      "deleted": 49,
+      "duration_ms": 0.189200000022538
+    },
+    {
+      "keys_checked": 65,
+      "buckets_visited": 100,
+      "deleted": 50,
+      "duration_ms": 0.11359999916749075
+    },
+    {
+      "keys_checked": 59,
+      "buckets_visited": 100,
+      "deleted": 32,
+      "duration_ms": 0.1443999972252641
+    },
+    {
+      "keys_checked": 55,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.14690000170958228
+    },
+    {
+      "keys_checked": 74,
+      "buckets_visited": 100,
+      "deleted": 54,
+      "duration_ms": 0.09309999950346537
+    },
+    {
+      "keys_checked": 71,
+      "buckets_visited": 100,
+      "deleted": 56,
+      "duration_ms": 0.16039999900385737
+    },
+    {
+      "keys_checked": 56,
+      "buckets_visited": 100,
+      "deleted": 37,
+      "duration_ms": 0.0760000002628658
+    },
+    {
+      "keys_checked": 61,
+      "buckets_visited": 100,
+      "deleted": 39,
+      "duration_ms": 0.17220000154338777
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 45,
+      "duration_ms": 0.11820000145235099
+    },
+    {
+      "keys_checked": 78,
+      "buckets_visited": 100,
+      "deleted": 59,
+      "duration_ms": 0.14200000077835284
+    },
+    {
+      "keys_checked": 54,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.09729999874252826
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 39,
+      "duration_ms": 0.16080000204965472
+    },
+    {
+      "keys_checked": 53,
+      "buckets_visited": 100,
+      "deleted": 33,
+      "duration_ms": 0.1517000018793624
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 48,
+      "duration_ms": 0.07760000153211877
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.07329999789362773
+    },
+    {
+      "keys_checked": 62,
+      "buckets_visited": 100,
+      "deleted": 39,
+      "duration_ms": 0.09729999874252826
+    },
+    {
+      "keys_checked": 60,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.1421999986632727
+    },
+    {
+      "keys_checked": 67,
+      "buckets_visited": 100,
+      "deleted": 48,
+      "duration_ms": 0.14990000272518955
+    },
+    {
+      "keys_checked": 57,
+      "buckets_visited": 100,
+      "deleted": 41,
+      "duration_ms": 0.16929999765125103
+    },
+    {
+      "keys_checked": 56,
+      "buckets_visited": 100,
+      "deleted": 40,
+      "duration_ms": 0.1005000012810342
+    },
+    {
+      "keys_checked": 60,
+      "buckets_visited": 100,
+      "deleted": 37,
+      "duration_ms": 0.07569999797851779
+    },
+    {
+      "keys_checked": 60,
+      "buckets_visited": 100,
+      "deleted": 42,
+      "duration_ms": 0.2730999985942617
+    },
+    {
+      "keys_checked": 71,
+      "buckets_visited": 100,
+      "deleted": 53,
+      "duration_ms": 0.1387999982398469
+    },
+    {
+      "keys_checked": 49,
+      "buckets_visited": 100,
+      "deleted": 38,
+      "duration_ms": 0.10770000153570436
+    },
+    {
+      "keys_checked": 69,
+      "buckets_visited": 100,
+      "deleted": 46,
+      "duration_ms": 0.11180000001331791
+    },
+    {
+      "keys_checked": 58,
+      "buckets_visited": 100,
+      "deleted": 39,
+      "duration_ms": 0.09510000018053688
+    },
+    {
+      "keys_checked": 70,
+      "buckets_visited": 100,
+      "deleted": 49,
+      "duration_ms": 0.1064000025507994
+    },
+    {
+      "keys_checked": 50,
+      "buckets_visited": 100,
+      "deleted": 37,
+      "duration_ms": 0.08719999823370017
+    },
+    {
+      "keys_checked": 64,
+      "buckets_visited": 100,
+      "deleted": 44,
+      "duration_ms": 0.08030000026337802
+    },
+    {
+      "keys_checked": 49,
+      "buckets_visited": 100,
+      "deleted": 31,
+      "duration_ms": 0.08589999924879521
+    }
+  ]
+}
