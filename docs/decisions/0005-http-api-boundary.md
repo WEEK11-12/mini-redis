@@ -7,7 +7,7 @@
 - 결정자: 사용자
 - 확인 근거: 3단계 설계의 실행 구조·키/라우팅과 PUT/오류 제안을 채택한다고 확인
 - 관련 문서: [기본 HTTP 계약](0003-http-response-contract.md), [HTTP 키의 슬래시 제외](0004-http-key-no-slash.md), [3단계 설계](../iterations/03-http-api/design.md), [3단계 요구사항](../iterations/03-http-api/requirements.md)
-- 대체 관계: 실행 구조 항목만 [D-0007](0007-single-thread-command-execution.md)에서 5단계 목표 경계로 변경. 그 밖의 계약은 유지
+- 대체 관계: 실행 구조 항목은 [D-0007](0007-single-thread-command-execution.md)에서 5단계 목표 경계로 변경. 5단계에서 수용 전 과부하·배출 중 접수 거부에 한한 좁은 가용성 예외는 [5단계 요구사항](../iterations/05-concurrency/requirements.md#req-05-005--기존-계약-유지와-동시성-검증-증거)와 [설계](../iterations/05-concurrency/design.md#2-인터페이스와-데이터-흐름)를 따르며 그 밖의 계약은 유지
 
 ## 배경과 판단 기준
 
@@ -19,7 +19,7 @@
 - HTTP 키는 ASCII 영문자·숫자·`-_.~`만 허용하고 키 전체가 `.`·`..`인 경우와 퍼센트 인코딩은 거부한다. 키 자체의 별도 길이 상한은 두지 않는다. 경로 해석을 단순화하는 대신 저장소가 받을 수 있는 일부 문자열은 HTTP에서 사용할 수 없다.
 - 구분 가능한 잘못된 키는 `400 INVALID_KEY`, 정의된 경로의 쿼리는 `400 INVALID_QUERY`, 미지원 메서드는 `405 METHOD_NOT_ALLOWED`, 미정의 경로는 `404 ROUTE_NOT_FOUND`로 구별한다. `PUT`은 매개변수 없는 `Content-Type: application/json`과 UTF-8 JSON 객체의 문자열 `value` 필드 하나만 허용하고 본문 선언 길이를 64 KiB로 제한한다. 잘못된 본문은 `400 INVALID_BODY`, 예상 밖 내부 오류는 세부 정보 없는 `500 INTERNAL_ERROR`로 구별한다. 이 엄격한 입력 정책은 구현 경계를 단순화하지만 일반 클라이언트의 표현 유연성을 줄인다.
 
-정확한 경로 분류 순서, `Allow` 헤더, 비정상 길이·전송 인코딩의 거부 및 연결 처리, `HEAD`의 본문 생략 등 세부 동작은 [3단계 설계](../iterations/03-http-api/design.md#2-기본-http-인터페이스와-입력-계약)를 따른다. D-0003의 기본 연산 응답과 Mini Redis가 생성·전송하는 모든 최종 HTTP 응답의 `Cache-Control: no-store`를 유지한다. **원본 API의 예시 데이터·키·프로세스 구성과 호출 횟수 관찰 방식은 이 공통 결정의 범위가 아니며 [3단계 설계](../iterations/03-http-api/design.md#4-외부-사용-예제의-흐름과-실패)에 둔다.**
+정확한 경로 분류 순서, `Allow` 헤더, 비정상 길이·전송 인코딩의 거부 및 연결 처리, `HEAD`의 본문 생략 등 세부 동작은 [3단계 설계](../iterations/03-http-api/design.md#2-기본-http-인터페이스와-입력-계약)를 따른다. 5단계의 **수용된 요청**에는 이 입력·오류 분류와 D-0003의 기본 연산 응답을 유지한다. 요청 처리 전 공통 한도 초과 또는 배출 중 새 접수 거부는 [5단계 설계](../iterations/05-concurrency/design.md#2-인터페이스와-데이터-흐름)의 좁은 가용성 예외이며, 입력·경로 분류 전에 가능한 `503 SERVER_BUSY` 또는 응답 불능 시 연결 종료가 발생할 수 있다. 이 예외도 Mini Redis가 생성·전송하는 모든 최종 HTTP 응답의 `Cache-Control: no-store` 및 전송되는 `HEAD` 응답의 본문 부재를 바꾸지 않는다. **원본 API의 예시 데이터·키·프로세스 구성과 호출 횟수 관찰 방식은 이 공통 결정의 범위가 아니며 [3단계 설계](../iterations/03-http-api/design.md#4-외부-사용-예제의-흐름과-실패)에 둔다.**
 
 ## 영향과 검증
 
