@@ -14,7 +14,7 @@
 
 ## 현재 출발점
 
-가벼운 범용 인메모리 캐시 서비스를 목표로 하며, 과제의 Optional 항목을 제외한 요구를 구현 범위에 포함합니다. 여러 애플리케이션 서버에서 공통으로 접근하는 사용 장면을 상정하고 [Python·HTTP API](docs/decisions/0002-python-http-interface.md)를 채택했습니다. 1~3단계의 각 범위와 [4단계 만료·무효화](docs/iterations/04-expiration-invalidation/overview.md)의 구현·제한 독립 검토를 완료했습니다. 단계별 테스트 실행 시점, 첫 검토의 수정 요청과 재검토 판정은 [4단계 검증 기록](docs/iterations/04-expiration-invalidation/verification.md)에 있습니다. [5단계 동시성](docs/iterations/05-concurrency/overview.md)은 요구사항 확정·설계 전체 검토·[TC 목록](docs/iterations/05-concurrency/test-cases.md)의 제한 승인 뒤 테스트 코드를 작성했으나 제품 구현·전체 실행 검증 전입니다. [부분 검증 기록](docs/iterations/05-concurrency/verification.md)은 현재 순차 서버의 초점 RED를 구분합니다. 전체 성능 비교는 후속 단계입니다. 4단계 제품·테스트 소스는 그 독립 검토 snapshot 이후 변경하지 않았습니다.
+가벼운 범용 인메모리 캐시 서비스를 목표로 하며, 과제의 Optional 항목을 제외한 요구를 구현 범위에 포함합니다. 여러 애플리케이션 서버에서 공통으로 접근하는 사용 장면을 상정하고 [Python·HTTP API](docs/decisions/0002-python-http-interface.md)를 채택했습니다. 1~3단계의 각 범위와 [4단계 만료·무효화](docs/iterations/04-expiration-invalidation/overview.md)의 구현·제한 독립 검토를 완료했습니다. 단계별 테스트 실행 시점, 첫 검토의 수정 요청과 재검토 판정은 [4단계 검증 기록](docs/iterations/04-expiration-invalidation/verification.md)에 있습니다. [5단계 동시성](docs/iterations/05-concurrency/overview.md)은 최초 결함 3건 해소 뒤 계측 적용 TC 25/25·수정 후 HTTP 회귀 47/47·보완 검증 10/10을 확인해 이번 HTTP 동시성 범위를 승인했습니다. 원본 테스트의 임시 접점은 저장소에 반영하지 않았으므로 무보정 원본 runner의 Green과는 구분합니다. [검증 기록](docs/iterations/05-concurrency/verification.md)은 구현 전 RED·실패/재실행·최종 결과와 적용 한계를 구분합니다. 전체 성능 비교는 후속 단계입니다. 4단계 저장소·테스트 소스는 그 독립 검토 snapshot 이후 변경하지 않았습니다.
 
 저장소 루트에서 Python 3으로 다음 명령을 각각 실행해 현재 단계의 테스트를 확인할 수 있습니다. Mini Redis·원본 API·one-shot 클라이언트 실행 명령은 [3단계 구현 기록](docs/iterations/03-http-api/implementation.md#실행-방법)에 있습니다.
 
