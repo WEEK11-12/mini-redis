@@ -4,5 +4,9 @@ AGENTS.md
 /.agent/
 __pycache__/
 *.pyc
-# per-checkout live benchmark raw results and logs (iteration 07)
+# per-checkout local demo state and raw logs
 /var/
+# virtualenv that scripts/demo.sh creates for the optional pymongo dependency
+/.venv-demo/
+
+.DS_Store

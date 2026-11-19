@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="demo-token" content="__TOKEN__"><title>키·값 읽기 체험</title>
+<style nonce="__NONCE__">
+:root {
+  color-scheme: light dark;
+  --bg: #f6f7f9; --card: #ffffff; --ink: #1c1f24; --muted: #5d6673; --line: #d9dee6;
+  --accent: #1f5fd0; --accent-ink: #ffffff; --ok: #1a6f45; --bad: #b4232a; --soft: #eef2f8;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #15181d; --card: #1e2229; --ink: #e9ecf1; --muted: #a3acba; --line: #333a45;
+          --accent: #6f9cf0; --accent-ink: #11151c; --ok: #6cc394; --bad: #f08a8f; --soft: #252b34; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+       font: 1rem/1.6 system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif; }
+.page { max-width: 48rem; margin: 0 auto; padding: 1.75rem 1rem 4rem; }
+header { margin-bottom: 1.5rem; }
+h1 { font-size: 1.5rem; line-height: 1.3; margin: 0 0 .35rem; }
+h2 { font-size: 1.1rem; margin: 0 0 .25rem; }
+h3 { font-size: .9rem; margin: 1.1rem 0 .4rem; color: var(--muted); font-weight: 600; }
+p { margin: .35rem 0; }
+.lede, .hint { color: var(--muted); font-size: .92rem; }
+section { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+          padding: 1.1rem 1.15rem; margin-bottom: 1.1rem; }
+form { display: grid; gap: .75rem; margin: .9rem 0 .5rem; }
+.field { display: grid; gap: .3rem; }
+.field > span { font-size: .85rem; font-weight: 600; }
+input { font: inherit; width: 100%; padding: .5rem .6rem; color: inherit;
+        background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font: inherit; padding: .45rem .9rem; border-radius: 8px; cursor: pointer;
+         border: 1px solid var(--line); background: var(--soft); color: inherit; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .55; cursor: progress; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600;
+                 justify-self: start; padding-inline: 1.4rem; }
+#notice { min-height: 1.6rem; font-size: .95rem; }
+#notice.ok { color: var(--ok); } #notice.bad { color: var(--bad); }
+#keys { list-style: none; margin: .6rem 0 0; padding: 0; }
+#keys li { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+           padding: .6rem 0; border-top: 1px solid var(--line); }
+#keys li:first-child { border-top: 0; }
+.key-name { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600;
+            margin-right: auto; overflow-wrap: anywhere; }
+.empty { color: var(--muted); font-size: .92rem; padding: .5rem 0; }
+#result { margin: .6rem 0 0; padding: .85rem .95rem; background: var(--soft);
+          border: 1px solid var(--line); border-radius: 10px; min-height: 4.4rem; }
+#result .where { font-weight: 600; }
+#result .value { margin: .4rem 0 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                 white-space: pre-wrap; overflow-wrap: anywhere; }
+#result .meta { color: var(--muted); font-size: .88rem; margin-top: .3rem; }
+#result.busy .where { color: var(--muted); } #result.bad .where { color: var(--bad); }
+#timing-summary { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+#timing-summary li { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: space-between;
+                     background: var(--soft); border-radius: 8px; padding: .45rem .65rem; font-size: .92rem; }
+#timing-recent { margin: 0; padding-left: 1.35rem; display: grid; gap: .3rem; font-size: .88rem; }
+#timing-recent li { color: var(--muted); overflow-wrap: anywhere; }
+#timing-recent b { color: var(--ink); font-weight: 600; }
+#timing-status { font-size: .9rem; color: var(--muted); }
+.note { background: var(--soft); border-left: 3px solid var(--line); border-radius: 0 8px 8px 0;
+        padding: .6rem .8rem; color: var(--muted); font-size: .88rem; margin: 1rem 0 0; }
+@media (max-width: 30rem) {
+  .page { padding: 1.25rem .75rem 3rem; }
+  section { padding: .9rem; border-radius: 10px; }
+  #keys li { gap: .4rem; } #keys li button { flex: 1 1 auto; }
+  button.primary { justify-self: stretch; width: 100%; }
+}
+</style></head><body>
+<div class="page">
+<header>
+  <h1>무엇을 저장하시겠어요?</h1>
+  <p class="lede">키와 값을 저장하고, 키마다 값을 읽어 오면서 어디에서 읽었는지와 걸린 시간을 확인할 수 있어요.</p>
+</header>
+
+<section aria-labelledby="save-title">
+  <h2 id="save-title">저장하기</h2>
+  <p class="hint">값은 빈 문자열도 저장할 수 있으며 약 64KB까지입니다. 키는 영문·숫자와 <code>-_.~</code>만 쓸 수 있어요.</p>
+  <form id="save-form">
+    <label class="field"><span>키</span>
+      <input name="key" required maxlength="200" pattern="[A-Za-z0-9_.\~\-]+" autocomplete="off"
+             inputmode="latin" placeholder="예: my-note"></label>
+    <label class="field"><span>값</span>
+      <input name="value" autocomplete="off" placeholder="저장할 내용"></label>
+    <button type="submit" class="primary">저장</button>
+  </form>
+  <p id="notice" role="status" aria-live="polite"></p>
+</section>
+
+<section aria-labelledby="keys-title">
+  <h2 id="keys-title">저장된 키</h2>
+  <p class="hint">키마다 <strong>값 읽어오기</strong>와 <strong>DB에서 직접 읽기</strong>를 눌러 결과를 비교해 보세요.</p>
+  <ul id="keys"></ul>
+</section>
+
+<section aria-labelledby="result-title">
+  <h2 id="result-title">읽기 결과</h2>
+  <div id="result" aria-live="polite"></div>
+</section>
+
+<section aria-labelledby="timing-title">
+  <h2 id="timing-title">속도 기록</h2>
+  <p id="timing-status" role="status"></p>
+  <h3>읽은 곳별 횟수·평균·중앙값</h3>
+  <ul id="timing-summary"></ul>
+  <h3>최근 기록 50개</h3>
+  <ol id="timing-recent"></ol>
+  <p class="note">이 화면의 시간은 이 컴퓨터에서 한 번씩 잰 체험 수치예요. 6단계 성능 비교와 같은 측정이 아니에요.</p>
+</section>
+</div>
+<script nonce="__NONCE__">
+'use strict';
+const token = document.querySelector('meta[name="demo-token"]').content;
+const notice = document.getElementById('notice');
+const result = document.getElementById('result');
+const keys = document.getElementById('keys');
+const saveForm = document.getElementById('save-form');
+const timingStatus = document.getElementById('timing-status');
+const timingSummary = document.getElementById('timing-summary');
+const timingRecent = document.getElementById('timing-recent');
+const SOURCE = {cache:'캐시', db_then_cache:'DB → 캐시', db_fallback:'DB(대체)', db_direct:'DB 직접'};
+const OPERATION = {save:'저장', read:'값 읽어오기', read_db:'DB에서 직접 읽기'};
+const STATUS = {success:'성공', failure:'실패', not_found:'없는 키'};
+function say(message, kind) {
+  notice.textContent = message;                 // server text is never inserted as markup
+  notice.className = kind || '';
+}
+function el(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+function showResult(kind, headline, value, meta) {
+  result.className = kind;
+  result.replaceChildren(el('p', headline, 'where'));
+  if (value !== undefined) result.append(el('p', value, 'value'));
+  if (meta !== undefined) result.append(el('p', meta, 'meta'));
+}
+async function api(path, data) {
+  const response = await fetch(path, data === undefined ? {cache:'no-store'} : {
+    method:'POST', cache:'no-store', headers:{'Content-Type':'application/json','X-Demo-Token':token},
+    body:JSON.stringify(data)
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error ? body.error.message : '요청 실패');
+  return body;
+}
+async function refreshTimings() {
+  try {
+    const data = await api('/api/timings');
+    timingSummary.replaceChildren(); timingRecent.replaceChildren();
+    for (const [source, stats] of Object.entries(data.summary)) {
+      const item = el('li');
+      item.append(el('span', (SOURCE[source] || source) + ' · ' + stats.count + '회'),
+                  el('span', '평균 ' + stats.mean_ms.toFixed(3) + 'ms · 중앙값 ' + stats.median_ms.toFixed(3) + 'ms'));
+      timingSummary.append(item);
+    }
+    if (!timingSummary.children.length) {
+      timingSummary.append(el('li', '아직 성공한 읽기 기록이 없어요.', 'empty'));
+    }
+    for (const row of data.recent) {
+      const item = el('li');
+      item.append(el('b', row.key), document.createTextNode(
+        ' · ' + (OPERATION[row.operation] || row.operation)
+        + ' · ' + (row.source ? (SOURCE[row.source] || row.source) : '해당 없음')
+        + ' · ' + row.elapsed_ms.toFixed(3) + 'ms · ' + (STATUS[row.status] || row.status)
+        + ' · ' + row.at));
+      timingRecent.append(item);
+    }
+    if (!data.recent.length) timingRecent.append(el('li', '기록이 쌓이면 여기에 보여요.', 'empty'));
+    timingStatus.textContent = '실패 ' + data.failure_count + '건, 없는 키 ' + data.not_found_count
+      + '건, 읽을 수 없는 기록 ' + data.invalid_count + '건';
+  } catch (error) { timingStatus.textContent = error.message; }
+}
+async function read(key, mode, label, button) {
+  const others = [...document.querySelectorAll('#keys button')];
+  others.forEach(other => { other.disabled = true; });
+  let timingFailed = false;
+  showResult('busy', key + ' 읽는 중…');  // never leave an earlier result as the current one
+  say('');
+  try {
+    const answer = await api('/api/reads', {key, mode});
+    showResult('', key + ' · ' + answer.message, '값: ' + answer.value,
+               '걸린 시간 ' + answer.elapsed_ms.toFixed(3) + 'ms · ' + label);
+    timingFailed = !answer.timing_saved;
+  } catch (error) {
+    showResult('bad', key + ' 읽기를 실패했어요.', undefined, label);
+    say(error.message, 'bad');
+  } finally {
+    others.forEach(other => { other.disabled = false; });
+    button.focus();
+  }
+  await refreshTimings();
+  if (timingFailed) timingStatus.textContent += ' · 이번 시간 기록을 저장하지 못했어요.';
+}
+async function list() {
+  const data = await api('/api/keys');
+  keys.replaceChildren();
+  for (const key of data.keys) {
+    const item = el('li');
+    item.append(el('span', key, 'key-name'));
+    for (const [label, mode] of [['값 읽어오기','cache_first'],['DB에서 직접 읽기','db_direct']]) {
+      const button = el('button', label);
+      button.type = 'button';
+      button.setAttribute('aria-label', key + ' ' + label);
+      button.addEventListener('click', () => read(key, mode, label, button));
+      item.append(button);
+    }
+    keys.append(item);
+  }
+  if (!data.keys.length) keys.append(el('li', '아직 저장한 키가 없어요. 위에서 먼저 저장해 보세요.', 'empty'));
+  if (data.truncated) say('앞의 200개 키만 표시합니다.');
+}
+saveForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const button = saveForm.querySelector('button');
+  button.disabled = true;
+  say('저장하는 중…');
+  let timingFailed = false;
+  try {
+    const answer = await api('/api/entries', {key:form.get('key'), value:form.get('value')});
+    say(answer.message + ' (' + answer.elapsed_ms.toFixed(3) + 'ms)', 'ok');
+    await list();
+    timingFailed = !answer.timing_saved;
+  } catch (error) { say(error.message, 'bad'); }
+  button.disabled = false;
+  await refreshTimings();
+  if (timingFailed) timingStatus.textContent += ' · 이번 시간 기록을 저장하지 못했어요.';
+});
+showResult('busy', '키를 골라 읽기 버튼을 누르면 결과가 여기에 보여요.');
+list().catch(error => { say(error.message, 'bad'); });
+refreshTimings();
+</script></body></html>

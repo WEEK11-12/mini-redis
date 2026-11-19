@@ -90,6 +90,22 @@ flowchart LR
 
 측정 조건과 해석: [6단계 개요](docs/iterations/06-integration-performance/overview.md#확정된-성능-비교-조건) · [성능 결과](docs/iterations/06-integration-performance/verification.md#3-성능-비교-실행)
 
+### 인터랙티브 캐시 시연 화면 (7단계)
+
+브라우저에서 키·값을 직접 저장하고, 키마다 **값 읽어오기**(캐시 우선)와 **DB에서 직접 읽기**를 눌러 어디에서 읽었는지와 걸린 시간을 확인하는 로컬 화면입니다. MongoDB가 원본이고, 페이지 서버가 시작할 때 띄운 **전용 Mini Redis 자식의 메모리**가 캐시입니다.
+
+![키와 값을 입력하는 저장 양식과 저장된 키 목록, 키마다 값 읽어오기·DB에서 직접 읽기 버튼이 보이는 시연 화면](docs/assets/interactive-cache-demo-main.png)
+
+저장 뒤 첫 읽기는 캐시 미스라 DB를 거쳐 캐시에 담고, 같은 키의 두 번째 읽기는 캐시에서 바로 옵니다. 읽은 곳과 걸린 시간은 서버가 기록해 아래처럼 쌓입니다.
+
+![캐시·DB → 캐시·DB 직접별 횟수와 평균·중앙값 요약, 그 아래 최근 읽기 기록 다섯 줄이 보이는 속도 기록 화면](docs/assets/interactive-cache-demo-timings.png)
+
+> 위 두 장은 전용 MongoDB 컨테이너(`demo-key`·`sample-note` 두 건만 넣은 빈 컬렉션)와 실제 전용 Mini Redis 자식을 띄우고 찍은 **샘플 화면**입니다.
+>
+> 화면의 밀리초는 **이 시연이 어느 경로로 읽었는지 보여 주는 체험 수치일 뿐 캐시와 DB의 성능 비교가 아닙니다.** 문서 2건짜리 로컬 MongoDB 조회는 그 자체로 1ms 안팎이라 HTTP로 캐시를 거치는 비용과 자릿수가 같습니다. 같은 절차를 두 번 돌린 실측 중앙값은 두 회차 모두 캐시 쪽이 낮았지만(1회차 캐시 0.47ms·DB 직접 0.54ms, 2회차 캐시 0.53ms·DB 직접 1.42ms) 차이의 크기가 회차마다 달라, 이 단발 체험값으로 캐시와 DB의 우열을 일반화할 수는 없습니다. 캐시 효과는 데이터가 크고 원본이 멀 때 나타나며, 조건을 고정해 측정한 결과는 위의 [6단계 성능 비교](#성능-비교-캐시를-쓸-때와-쓰지-않을-때)에 있습니다.
+
+**확인된 것과 한계:** 자동화 시험 30개 통과, 실제 전용 MongoDB를 띄운 브라우저 정상 시연(저장→첫 읽기 DB 경유→두 번째 캐시→수정→직접 읽기→기록 보존), 키보드 조작·360px 좁은 화면 확인을 마쳤습니다. 독립 검토는 세 수정(불완전 HTTP 응답 처리, 실패 결과 표시, CSP nonce)과 정리 영향에 **한정**해 통과했고 전체 기능 승인은 아닙니다. 합의한 로컬 시연 범위에서 **7단계를 마감**했습니다 — [7단계 검증 결과](docs/iterations/07-interactive-cache-demo/verification.md).
+
 ## AI 기반 개발 루프 구조
 
 이 프로젝트는 **개발자가 범위와 선택을 판단하고, 에이전트가 역할별로 초안·설계·구현·검증을 지원하는 반복 루프**로 진행했습니다. 설계를 먼저 모두 끝내지 않고, **단계마다 요구사항→설계→설계 검증→구현 전 TC→구현→구현 검증의 한 사이클을 돌려** 앞 단계의 결과를 다음 단계에 반영했습니다. 설계와 구현은 작성한 에이전트가 아니라 별도의 검증 에이전트가 검토했고, 수정 요청이 나오면 해당 단계로 돌아갔습니다. 단계 간 계약이 바뀌면 새 결정으로 기록했습니다(3단계의 순차 서버 → 5단계의 단일 명령 스레드, [D-0007](docs/decisions/0007-single-thread-command-execution.md)).
@@ -129,19 +145,27 @@ mini-redis/
 │   ├── seed_mongo.py            성능 측정용 MongoDB 시드(기본 100만 문서, pymongo 필요)
 │   ├── requirements-mongo.txt   MongoDB 측정에만 쓰는 선택 의존성(격리 venv에 설치)
 │   ├── client.py                캐시 조회 → 미스일 때만 원본 호출·저장하는 클라이언트
-│   └── benchmark.py             캐시 미사용·미스·히트 지연시간 측정
+│   ├── benchmark.py             캐시 미사용·미스·히트 지연시간 측정
+│   ├── interactive_cache.py     시연의 저장·읽기 흐름, 전용 캐시 자식 실행, 속도 기록
+│   ├── interactive_cache_page.py  시연 페이지 서버(루프백 전용, 토큰·출처 검증)
+│   └── interactive_cache_page.html  시연 화면(입력·키 목록·읽기 결과·속도 기록)
+├── scripts/                   실행 진입점
+│   ├── demo.sh                  인터랙티브 캐시 시연 한 번에 실행(검사·venv·MongoDB·페이지)
+│   ├── check_port_binding.py    컨테이너 포트 매핑이 127.0.0.1:27019 → 27017/tcp인지 확인
+│   └── test-demo.sh             시연 자동 시험만 실행
 ├── tests/                     자동화 테스트 (저장소·HTTP·만료·동시성)
 └── docs/                      사람이 읽는 모든 문서
     ├── assignment.md            과제 원문 (기준)
     ├── requirements.md          요구사항 통합 안내: 단계별 요구사항을 한 곳에서 요약
     ├── design.md                설계 통합 안내: 구조와 주요 선택을 한 곳에서 요약
     ├── implementation.md        구현 통합 안내: 코드 경로·역할·실행 방법 요약
-    ├── decisions/               주요 결정 기록 D-0001~0008 (선택 이유·영향·재검토 조건)
+    ├── assets/                  README에 넣는 화면 이미지
+    ├── decisions/               주요 결정 기록 D-0001~0007 (선택 이유·영향·재검토 조건)
     ├── iterations/              1~6단계 완료 기록과 7단계 후속 작업 (아래 설명)
     └── study/                   Redis 개념 학습 자료
 ```
 
-`docs/iterations/`는 1~6단계의 완료 기록과 7단계 후속 웹 시연의 계약·설계를 구분합니다. 단계별 산출물과 실제 진행 상태는 상위 [이터레이션 안내](docs/iterations/README.md)와 각 개요에서 확인합니다.
+`docs/iterations/`는 1~6단계의 완료 기록과 7단계 후속 웹 시연을 구분합니다. 단계별 산출물과 실제 진행 상태는 상위 [이터레이션 안내](docs/iterations/README.md)와 각 개요에서 확인합니다.
 
 | 단계 | 내용 |
 | --- | --- |
@@ -151,7 +175,7 @@ mini-redis/
 | 4 | [만료·무효화](docs/iterations/04-expiration-invalidation/overview.md) |
 | 5 | [동시성](docs/iterations/05-concurrency/overview.md) |
 | 6 | [전체 사용·성능 검증](docs/iterations/06-integration-performance/overview.md) |
-| 7 (후속·구현 전) | [실시간 성능 비교 웹 뷰](docs/iterations/07-live-benchmark-ui/overview.md) — [실행·화면 계약 채택](docs/decisions/0008-live-benchmark-contract.md) |
+| 7 (로컬 시연 범위 완료) | [키·값 인터랙티브 캐시 시연 페이지](docs/iterations/07-interactive-cache-demo/overview.md) |
 
 ## 주제별로 읽기
 
@@ -167,7 +191,48 @@ mini-redis/
 
 ## 실행과 확인
 
-저장소 루트에서 Python 3으로 실행합니다.
+### 인터랙티브 캐시 시연 (한 명령)
+
+Python 3와 **실행 중인 Docker**만 준비되어 있으면 저장소 루트에서 이 한 줄로 끝납니다.
+
+```sh
+./scripts/demo.sh
+```
+
+스크립트는 Python·`fcntl`·Docker 실행 상태를 확인하고, 격리 가상환경 `.venv-demo`에 `pymongo`를 준비하고, 시연 전용 MongoDB 컨테이너 `mini-redis-demo`를 `127.0.0.1:27019`에 띄워 응답을 기다린 뒤, <http://127.0.0.1:8766/> 에 페이지를 엽니다. 다시 실행해도 이미 있는 가상환경과 컨테이너를 그대로 재사용합니다.
+
+브라우저에서 이 순서로 확인합니다.
+
+1. 키와 값을 입력하고 **저장**합니다. 같은 키로 다시 저장하면 "수정했어요"로 구분됩니다.
+2. 그 키의 **값 읽어오기** — 저장 직후에는 캐시가 비어 있어 "DB에서 읽어와 캐시에 담았어요"가 나옵니다.
+3. 한 번 더 **값 읽어오기** — 이번에는 "캐시에서 읽어왔어요"입니다.
+4. 값을 수정한 뒤 다시 읽으면 새 값이 나옵니다. **DB에서 직접 읽기**는 캐시를 채우지 않습니다.
+5. 아래 **속도 기록**에서 읽은 곳별 횟수·평균·중앙값과 최근 기록을 확인합니다. 기록은 `var/interactive-cache-demo/timings.jsonl`에 남아 서버를 다시 켜도 유지됩니다.
+
+끝낼 때는 터미널에서 `Ctrl+C`를 누릅니다. 스크립트가 띄운 페이지 서버와 전용 캐시 자식만 종료되고, MongoDB 컨테이너·볼륨과 속도 기록은 그대로 남습니다. DB까지 멈추려면 `docker stop mini-redis-demo`를 직접 실행하세요. 컨테이너와 명명 볼륨을 지우지 않는 한 저장한 키·값은 보존됩니다.
+
+**다른 자원을 건드리지 않는 기준:** 포트 `8766`이 이미 쓰이고 있으면 중복 서버를 만들지 않고 안내만 하고 멈춥니다(`DEMO_PAGE_PORT=<포트>`로 바꿀 수 있습니다). 스크립트가 만든 컨테이너·볼륨에는 표지 `mini-redis-demo=1`을 붙이고, 재실행할 때는 **그 표지가 있는 자원만** 자동으로 재사용합니다. 표지가 없는 기존 컨테이너·볼륨은 이름이 같아도 쓰지 않고 멈추며(이름을 지정한 것만으로 승인으로 보지 않습니다), 그 자원이 이 시연 전용임을 **직접 확인한 경우에만** 다음처럼 명시적으로 승인해 재사용합니다.
+
+```sh
+# 예: 재번호화 전 이름으로 만들어 둔 기존 시연 컨테이너를 쓸 때
+DEMO_CONTAINER=mini-redis-i08-demo DEMO_ALLOW_LEGACY=mini-redis-i08-demo ./scripts/demo.sh
+```
+
+재사용 전에 이미지가 `mongo:*`인지, `/data/db`가 **이름 있는 볼륨**인지(임의 디렉터리 bind mount는 거부), `27017/tcp`가 정확히 `127.0.0.1:27019`에 매핑됐는지 확인하고, 하나라도 맞지 않으면 MongoDB를 시작하거나 접속하기 전에 멈춥니다. 어떤 경우에도 다른 컨테이너·볼륨을 멈추거나 지우지 않습니다. Docker 설치나 시스템 설정은 바꾸지 않습니다. MongoDB 주소는 앱이 `mongodb://127.0.0.1:27019`로 고정해 두었고 `mini_redis_demo.entries` 컬렉션만 씁니다 — 1~6단계 측정용 MongoDB(`27018`)와 시드 컬렉션은 쓰지 않습니다.
+
+페이지는 `127.0.0.1`에만 바인딩하고, 저장·읽기 요청은 같은 출처와 시작할 때마다 새로 만든 토큰을 요구합니다. 브라우저에서 임의의 DB 주소나 명령을 넣을 수는 없습니다. 자세한 범위와 한계는 [7단계 개요](docs/iterations/07-interactive-cache-demo/overview.md)에 있습니다.
+
+### 시연 자동 시험 (한 명령)
+
+```sh
+./scripts/test-demo.sh
+```
+
+시연의 자동 시험 `tests/test_interactive_cache.py` 30개만 실행합니다. MongoDB·Docker·네트워크가 필요 없고, 실행 중인 시연과 저장한 데이터에 영향을 주지 않습니다. 실패하면 그대로 0이 아닌 종료 코드를 돌려줍니다. 두 스크립트 모두 `--help`를 지원합니다.
+
+### 다른 단계의 시험과 실행
+
+이 두 명령에는 다른 단계의 시험이 들어 있지 않습니다. 저장소 루트에서 Python 3으로 따로 실행합니다.
 
 ```sh
 python3 -m unittest discover -s tests -p 'test_store.py' -q
